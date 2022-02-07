@@ -1,4 +1,5 @@
-# Analysis of Youtube Trending
+# Analysis of Trending Youtube Videos
+## STAT 108
 Repository for final project of STAT 108: Linear Regression
 
 In this repository, I wish to explore how certain characteristics of a youtube video such as its title, upload time affect the success of a video such as a video's viewcount. One question is whether certain clickbait strategies applied to titles of thumbnails of videos really affect the view count of a video. Additionally do these strategies affect how viewers perceive the video. For example, do videos with clickbait titles end up having a lower like to dislike ratio? I would suspect that specific ways of formatting titles is associated with an increased viewcount. 
