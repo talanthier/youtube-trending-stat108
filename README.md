@@ -8,8 +8,8 @@ The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtub
 
 Structure of the Dataset is shown below.
 
-Rows: 109,791
-Columns: 16
+Rows: 109,791 \
+Columns: 16 \
 $ video_id          <chr> "3C66w5Z0ixs", "M9Pmf9AB4Mo", "J78aPJ3VyNs", "kXLn3HkpjaA", "VIUo6yapDbc", "w-aidBdvZo8", "uet14uf9NsE", "ua4QMFQATco", "Sns~
 $ title             <chr> "I ASKED HER TO BE MY GIRLFRIEND...", "Apex Legends | Stories from the Outlands â\200“ â\200œThe Endorsementâ\200\235", "I l~
 $ publishedAt       <chr> "2020-08-11T19:20:14Z", "2020-08-11T17:00:10Z", "2020-08-11T16:34:06Z", "2020-08-11T16:38:55Z", "2020-08-11T15:10:05Z", "202~
