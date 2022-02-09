@@ -1,5 +1,5 @@
 # Data Dictionary
-The dataset used in our analysis is sampled_data.csv. This is a random sample of 1/10 of the original dataset and with the description column dropped.
+The dataset used in our analysis is sampled_data.csv. This is a random sample of 1/10 of the original dataset and with the description column dropped. I plan on adding more features such as number of capital letters or punctuation in the title.
 ```
 Rows: 10,979 
 Columns: 15
