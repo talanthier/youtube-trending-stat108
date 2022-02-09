@@ -7,7 +7,7 @@ In this repository, I wish to explore how certain characteristics of a youtube v
 
 The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtube-trending-video-dataset?select=RU_youtube_trending_data.csv). The dataset includes all videos that have been trending starting from August of 2020 and includes data on all trending videos up to the present. We have decided only to include trending videos from the US. For the purpose of this project, the data we will use is a simple random sample from the US trending videos dataset. We have also removed the description column as it will not be used in the analysis.
 
-Structure of the Dataset is shown below.
+Structure of the Dataset is shown below. See data folder for more information on the dataset.
 ```
 Rows: 10,979
 Columns: 15
