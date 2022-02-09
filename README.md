@@ -9,21 +9,20 @@ The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtub
 
 Structure of the Dataset is shown below.
 
-Rows: 109,791 \
-Columns: 16 \
-$ video_id          <chr> "3C66w5Z0ixs", "M9Pmf9AB4Mo", "J78aPJ3VyNs", "kXLn3HkpjaA", "VIUo6yapDbc", "w-aidBdvZo8", "uet14uf9NsE", "ua4QMFQATco", "Sns~ \
-$ title             <chr> "I ASKED HER TO BE MY GIRLFRIEND...", "Apex Legends | Stories from the Outlands â\200“ â\200œThe Endorsementâ\200\235", "I l~ \
-$ publishedAt       <chr> "2020-08-11T19:20:14Z", "2020-08-11T17:00:10Z", "2020-08-11T16:34:06Z", "2020-08-11T16:38:55Z", "2020-08-11T15:10:05Z", "202~ \
-$ channelId         <chr> "UCvtRTOMP2TqYqu51xNrqAzg", "UC0ZV6M2THA81QT9hrVWJG3A", "UCYzPXprvl5Y-Sf0g4vX-m6g", "UCbg_UMjlHJg_19SZckaKajg", "UCDVPcEbVLQ~ \
-$ channelTitle      <chr> "Brawadis", "Apex Legends", "jacksepticeye", "XXL", "Mr. Kate", "Professor Live", "Les Do Makeup", "CGP Grey", "Louie's Life~ \
-$ categoryId        <int> 22, 20, 24, 10, 26, 24, 26, 27, 24, 10, 22, 22, 20, 10, 23, 22, 24, 22, 26, 10, 28, 1, 24, 24, 22, 24, 10, 1, 10, 22, 27, 22~ \
-$ trending_date     <chr> "2020-08-12T00:00:00Z", "2020-08-12T00:00:00Z", "2020-08-12T00:00:00Z", "2020-08-12T00:00:00Z", "2020-08-12T00:00:00Z", "202~ \
-$ tags              <chr> "brawadis|prank|basketball|skits|ghost|funny videos|vlog|vlogging|NBA|browadis|challenges|bmw i8|faze rug|faze rug brother|m~ \
-$ view_count        <int> 1514614, 2381688, 2038853, 496771, 1123889, 949491, 470446, 1050143, 1402687, 741028, 940036, 591837, 320872, 413372, 921261~ \
-$ likes             <int> 156908, 146739, 353787, 23251, 45802, 77487, 47990, 89190, 95694, 113983, 87111, 44168, 14288, 26440, 124183, 4511, 10102, 3~ \
-$ dislikes          <int> 5855, 2794, 2628, 1856, 964, 746, 440, 854, 2158, 4373, 1860, 409, 774, 293, 1678, 69, 7932, 197, 1425, 15174, 15818, 1120, ~ \
-$ comment_count     <int> 35313, 16549, 40221, 7647, 2196, 7506, 4558, 6455, 6613, 5618, 7052, 2652, 2085, 1495, 16460, 673, 2763, 3666, 15773, 31039,~ \
-$ thumbnail_link    <chr> "https://i.ytimg.com/vi/3C66w5Z0ixs/default.jpg", "https://i.ytimg.com/vi/M9Pmf9AB4Mo/default.jpg", "https://i.ytimg.com/vi/~ \
-$ comments_disabled <chr> "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False"~ \
-$ ratings_disabled  <chr> "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False"~ \
-$ description       <chr> "SUBSCRIBE to BRAWADIS â–¶ http://bit.ly/SubscribeToBrawadis\n\nFOLLOW ME ON SOCIAL\nâ–¶ Twitter: https://twitter.com/Brawad~ \
+Rows: 10,979 \
+Columns: 15 \
+$ video_id          <chr> "05HuTGeF5AA", "SXrOuIhoslA", "hzwTq8ZZeyM", "Z6dwgWQz-Ck", "Fy7FsMBcUk8", "mtHRN9LpZ8g", "mM7C_Pw7OL8", "H8pM8PbtjfY", "T~ \
+$ title             <chr> "Khabib Nurmagomedov Announces Retirement | UFC 254", "TRYING MORE TIKTOK FOOD HACKS - Part 2", "Among Us But Impostor Can~ \
+$ publishedAt       <chr> "2020-10-24T21:27:37Z", "2020-09-26T15:33:12Z", "2021-04-04T17:00:14Z", "2021-01-19T18:00:08Z", "2020-11-03T13:02:21Z", "2~ \
+$ channelId         <chr> "UCvgfXK4nTYKudb0rFR6noLA", "UCjwmbv6NE4mOh8Z8VhPUx1Q", "UCMDtoPUno_f-puMpHL3Uuqg", "UCYJPby9DRCteedh5tfxVbrw", "UCbD8EppR~ \
+$ channelTitle      <chr> "UFC - Ultimate Fighting Championship", "Rosanna Pansino", "STA Studios", "Smosh Pit", "Mnet K-POP", "More SypherPK", "Tom~ \
+$ categoryId        <int> 17, 26, 20, 22, 24, 20, 27, 17, 10, 26, 17, 24, 20, 17, 27, 24, 10, 2, 1, 28, 10, 17, 10, 20, 1, 20, 17, 10, 22, 24, 22, 1~ \
+$ trending_date     <chr> "2020-10-27T00:00:00Z", "2020-09-30T00:00:00Z", "2021-04-10T00:00:00Z", "2021-01-23T00:00:00Z", "2020-11-12T00:00:00Z", "2~ \
+$ tags              <chr> "khabib|retires|nurmagomedov|retirement|annouces|ufc|254|ufc 254|reaction|interview|post|fight|octagon|jon|anik|justin|gae~ \
+$ view_count        <int> 17992021, 710333, 1647002, 812308, 3662591, 801205, 647030, 598962, 2542185, 295733, 194239, 734852, 557620, 1231254, 6932~ \
+$ likes             <int> 461029, 36136, 49652, 51599, 248601, 30804, 58505, 13988, 200535, 14754, 5949, 9904, 63422, 24758, 20754, 3006, 11273, 453~ \
+$ dislikes          <int> 10048, 619, 1676, 503, 2797, 618, 203, 456, 1492, 201, 98, 1444, 0, 336, 2804, 101, 179, 0, 794, 946, 218, 193, 133, 1770,~ \
+$ comment_count     <int> 50333, 4093, 2179, 2235, 10062, 2418, 1717, 1250, 17124, 495, 1053, 6117, 873, 4222, 5597, 487, 1015, 3014, 5535, 2589, 32~ \
+$ thumbnail_link    <chr> "https://i.ytimg.com/vi/05HuTGeF5AA/default.jpg", "https://i.ytimg.com/vi/SXrOuIhoslA/default.jpg", "https://i.ytimg.com/v~ \
+$ comments_disabled <chr> "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "Fals~ \
+$ ratings_disabled  <chr> "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "Fals~
