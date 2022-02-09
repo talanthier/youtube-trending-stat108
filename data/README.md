@@ -18,5 +18,4 @@ $ comment_count     <int> number of dislikes
 $ thumbnail_link    <chr> link to thumbnail image 
 $ comments_disabled <chr> comments are disabled (T/F) 
 $ ratings_disabled  <chr> ratings are disablsed (T/F) 
-$ description       <chr> "SUBSCRIBE to BRAWADIS â–¶ http://bit.ly/SubscribeToBrawadis\n\nFOLLOW ME ON SOCIAL\nâ–¶ Twitter: https://twitter.com/Brawad~ 
 ```
