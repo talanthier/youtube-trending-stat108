@@ -1,8 +1,8 @@
+# Data Dictionary
 The dataset used in our analysis is sampled_data.csv. This is a random sample of 1/10 of the original dataset and with the description column dropped. The dimensions are as follows: \
 Rows: 10,979 \
-Columns: 15 \
+Columns: 15
 
-### Data Dictionary
 $ video_id          <chr> video id \
 $ title             <chr> video title \
 $ publishedAt       <chr> date and time published
