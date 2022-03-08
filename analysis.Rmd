@@ -45,9 +45,10 @@ Let's start by checking for missing values. When generating some of the features
 ```{r}
 colSums(is.na(youtube))
 ```
-The only column with missing values is `subscriberCount`. When using the Youtube API to access subscriber counts, for channels with hidden subscriber counts, we decided to input those values of `subscriberCount` as missing. Seeing as we have so few observations, we will drop these from the dataset.
+The only column with missing values is `subscriberCount` and `desc_length`. When using the Youtube API to access subscriber counts, for channels with hidden subscriber counts, we decided to input those values of `subscriberCount` as missing. Seeing as we have so few observations, we will drop these from the dataset. For those with missing description length, this is because those videos have no description. So we will replace those with `desc_length` of 0.
 
 ```{r}
+youtube$desc_length[is.na(youtube$desc_length)] <- 0
 youtube <- youtube %>%
   drop_na()
 ```
@@ -381,49 +382,111 @@ ggplot(data = youtube, aes(x = videoCount, y = log_views)) +
 
 Based off of this second plot, `videoCount` still does not appear to be all that useful. It doesn't look like the number of video's a channel has affects the number of views a trending video might have. 
 
+```{r}
+b23 <- ggplot(data = youtube, aes(x = weekday_published, y =log_views)) +
+  geom_boxplot()
+
+b24 <- ggplot(data = youtube, aes(x = hour_published, y =log_views)) +
+  geom_boxplot()
+
+b25 <- ggplot(data = youtube, aes(x = day_published, y =log_views)) +
+  geom_boxplot()
+
+b24+b23/b25
+```
+
+Here it looks like the day of the week in which the video was  doesn't appear to have much of a relationship with `log_views` as the mean of `log_views` is consistent across all days of the week. Meanwhile there is quite a bit of variability in `log_views` across `hour_published`. So `hour_published` might be useful in our model. The same could be said about `day_published` as well.
+
 ### Multivariate
 
-Now that we have identified some predictor variables that may be useful, we will explore some of the relationships between them.
+Now that we have identified some predictor variables that may be useful, we will explore some of the relationships between them. We will start by looking at `subscriberCount`.
 
 
 ```{r}
-m1 <- ggplot(data = youtube, aes(x = subscriberCount, y = videoCount, color = log_views)) +
-  geom_point()
+m1 <- ggplot(data = youtube, aes(x = category, y = subscriberCount)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90))
 
-m2 <- ggplot(data = youtube, aes(x = subscriberCount, y = video_length, color = log_views)) +
-  geom_point()
-
-m3 <- ggplot(data = youtube, aes(x = subscriberCount, y = trending_age, color = log_views)) +
+m2 <- ggplot(data = youtube, aes(x = comments_disabled, y = subscriberCount)) +
   geom_boxplot()
 
-m4 <- ggplot(data = youtube, aes(x = subscriberCount, y = category, color = log_views)) +
+m3 <- ggplot(data = youtube, aes(x = ratings_disabled, y = subscriberCount)) +
+  geom_boxplot()
+
+m4 <- ggplot(data = youtube, aes(x = num_caps, y = subscriberCount)) +
+  geom_point(alpha = 0.2)
+
+m5 <- ggplot(data = youtube, aes(x = num_exc, y = subscriberCount)) +
+  geom_boxplot()
+  
+m6 <- ggplot(data = youtube, aes(x = num_period, y = subscriberCount)) +
+  geom_boxplot()
+
+m7 <- ggplot(data = youtube, aes(x = num_dollar, y = subscriberCount)) +
+  geom_boxplot()
+
+m8 <- ggplot(data = youtube, aes(x = desc_length, y = subscriberCount)) +
+  geom_point(alpha = 0.2)
+
+m9 <- ggplot(data = youtube, aes(x = hour_published, y = subscriberCount)) +
+  geom_boxplot()
+
+m10 <- ggplot(data = youtube, aes(x = day_published, y = subscriberCount)) +
   geom_boxplot()
 
 m1 + m2
 m3 + m4
-  
+m5 + m6
+m7 +m8
+m9 + m10
 ```
 
+Looking at the above plots, it looks like `category`, `ratings_disabled`, `num_dollar`, `hour_published`, and `day_published` stand out as potentially associated with `subscriberCount` shown by the difference in mean subscriber counts across the groups in each of those predictor variables. For example, the mean subscriber count for videos with ratings disabled is quite a bit higher than the mean subscriber count for the videos with ratings enabled.
+
 ```{r}
-m5 <- ggplot(data = youtube, aes(x = subscriberCount, y = desc_length, color = log_views)) +
-  geom_point()
+m11 <- ggplot(data = youtube, aes(fill = comments_disabled, x = category)) +
+  geom_bar(position = 'fill') +
+  theme(axis.text.x = element_text(angle = 90))
 
-m6 <- ggplot(data = youtube, aes(x = subscriberCount, y = title_length, color = log_views)) +
-  geom_point()
+m12 <- ggplot(data = youtube, aes(fill = ratings_disabled, x = category)) +
+  geom_bar(position = 'fill') +
+  theme(axis.text.x = element_text(angle = 90))
 
-m7 <- ggplot(data = youtube, aes(x = subscriberCount, y = num_tags, color = log_views)) +
-  geom_point()
+m13 <- ggplot(data = youtube, aes(x = num_caps, y = category)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90))
 
-m5+m6
-m7
+m14 <- ggplot(data = youtube, aes(fill = num_exc, x = category)) +
+  geom_bar(position = 'fill') +
+  theme(axis.text.x = element_text(angle = 90))
+
+m15 <- ggplot(data = youtube, aes(fill = num_period, x = category)) +
+  geom_bar(position = 'fill') +
+  theme(axis.text.x = element_text(angle = 90))
+
+m16 <- ggplot(data = youtube, aes(x = desc_length, y = category)) +
+  geom_boxplot()
+
+m17 <- ggplot(data = youtube, aes(fill = hour_published, x = category)) +
+  geom_bar(position = 'fill') +
+  theme(axis.text.x = element_text(angle = 90))
+
+m18 <- ggplot(data = youtube, aes(fill = day_published, x = category)) +
+  geom_bar(position = 'fill') +
+  theme(axis.text.x = element_text(angle = 90))
+
+m11+m12
+m13+m14
+m15+m16
+m17+m18
 ```
 
-```{r}
-m7 <- ggplot(data = youtube, aes(x = title_length, y = desc_length, color = log_views)) +
-  geom_point()
+Looking at these plots, it looks like the the video category is related to many of the other variables we're interested. The one that doesn't stand out is `ratings_disabled` as the proportion of those with ratings disabled is pretty consistent across categories. Meanwhile for things like the `num_caps` and `desc_length` we see on average a higher number of capital letters and longer length descriptions in Action/Adventure videos.
 
-m8 <- ggplot(data = youtube, aes(x = title_length, y =, color = log_views)) +
-  geom_point()
+LIST: subscriberCount, category, comments_disabled, ratings_disabled, num_caps, num_exc, num_period, num_dollar, desc_length, hour_published, day_published
+
+```{r}
+
 ```
 
 
