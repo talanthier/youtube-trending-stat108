@@ -9,22 +9,8 @@ The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtub
 
 Structure of the Dataset is shown below. See data folder for more information on the dataset.
 ```
-Show in New Window
-Registered S3 methods overwritten by 'dbplyr':
-  method         from
-  print.tbl_lazy     
-  print.tbl_sql      
--- Attaching packages ------------------------------------------------------------------------------------------------------------ tidyverse 1.3.1 --
-v ggplot2 3.3.5     v purrr   0.3.4
-v tibble  3.1.6     v dplyr   1.0.7
-v tidyr   1.1.4     v stringr 1.4.0
-v readr   2.1.1     v forcats 0.5.1
--- Conflicts --------------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
-x dplyr::filter() masks stats::filter()
-x dplyr::lag()    masks stats::lag()
-Show in New Window
 Rows: 982
-Columns: 29
+Columns: 32
 $ video_id          <chr> "05HuTGeF5AA", "SXrOuIhoslA", "hzwTq8ZZeyM", "Z6dwgWQz-Ck", "Fy7FsMBcUk8", "mtHRN9LpZ8g", "mM7C_Pw7OL8", "H8pM8PbtjfY", "~
 $ title             <chr> "Khabib Nurmagomedov Announces Retirement | UFC 254", "TRYING MORE TIKTOK FOOD HACKS - Part 2", "Among Us But Impostor Ca~
 $ publishedAt       <chr> "2020-10-24 21:27:37+00:00", "2020-09-26 15:33:12+00:00", "2021-04-04 17:00:14+00:00", "2021-01-19 18:00:08+00:00", "2020~
@@ -39,6 +25,7 @@ $ dislikes          <int> 10048, 619, 1676, 503, 2797, 618, 203, 456, 1492, 201,
 $ comment_count     <int> 50333, 4093, 2179, 2235, 10062, 2418, 1717, 1250, 17124, 495, 1053, 6117, 873, 4222, 5597, 487, 1015, 3014, 5535, 2589, 3~
 $ comments_disabled <chr> "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "Fal~
 $ ratings_disabled  <chr> "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "Fal~
+$ description       <chr> "After defeating Justin Gaethje and improving to 29-0 at UFC 254, Khabib Nurmagomedov announced the performance would be ~
 $ num_tags          <int> 252, 468, 7, 85, 93, 432, 59, 172, 406, 7, 44, 281, 7, 238, 453, 24, 64, 448, 394, 310, 160, 77, 94, 198, 143, 448, 456, ~
 $ num_caps          <int> 7, 26, 7, 7, 38, 13, 7, 7, 16, 9, 4, 17, 5, 7, 12, 6, 3, 18, 8, 5, 7, 14, 7, 6, 9, 10, 17, 13, 7, 25, 3, 12, 14, 3, 41, 2~
 $ num_exc           <int> 0, 0, 0, 1, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 2, 0~
@@ -46,12 +33,14 @@ $ num_qm            <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 $ num_period        <int> 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0~
 $ num_dollar        <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
 $ title_length      <int> 50, 38, 37, 43, 64, 76, 42, 39, 83, 51, 54, 95, 38, 41, 47, 47, 25, 96, 66, 34, 40, 58, 56, 36, 44, 57, 79, 47, 42, 31, 2~
+$ desc_length       <dbl> 986, 1131, 113, 1835, 64, 753, 866, 647, 648, 739, 440, 1433, 141, 1031, 4864, 685, 445, 4789, 1491, 651, 2319, 584, 2483~
 $ weekday_published <int> 5, 5, 6, 1, 1, 1, 0, 1, 3, 0, 4, 6, 3, 1, 0, 2, 1, 0, 5, 1, 4, 2, 2, 6, 2, 2, 3, 2, 1, 3, 3, 6, 5, 0, 6, 2, 4, 6, 4, 2, 6~
 $ day_published     <int> 24, 26, 4, 19, 3, 8, 30, 18, 17, 3, 12, 3, 6, 2, 2, 23, 1, 20, 3, 20, 23, 23, 27, 29, 16, 28, 4, 26, 10, 22, 1, 27, 23, 1~
 $ hour_published    <int> 21, 15, 17, 18, 13, 6, 16, 17, 19, 22, 19, 6, 16, 18, 15, 16, 17, 17, 17, 13, 4, 6, 19, 12, 15, 19, 18, 18, 17, 16, 20, 2~
 $ trending_age      <int> 3, 4, 6, 4, 9, 6, 1, 5, 5, 5, 4, 5, 1, 2, 4, 4, 3, 5, 1, 4, 2, 2, 4, 7, 5, 4, 3, 5, 3, 2, 6, 7, 4, 2, 3, 2, 2, 6, 1, 2, 3~
 $ video_length      <dbl> 331, 1226, 524, 902, 351, 613, 287, 920, 233, 690, 1795, 322, 59, 592, 596, 133, 144, 2218, 1176, 1119, 143, 514, 311, 26~
 $ subscriberCount   <int> 13300000, 13200000, 1130000, 7330000, 19300000, 1550000, 4910000, 922000, 36400, 424000, 96700, 600000, 1860000, 13300000~
-$ videoCount        <int> 11342, 917, 124, 1548, 27360, 594, 648, 895, 52, 133, 2454, 307, 88, 11342, 127, 1745, 689, 507, 334, 1012, 87, 2840, 81,~
+$ videoCount        <int> 11340, 917, 124, 1548, 27360, 594, 648, 895, 52, 133, 2454, 307, 88, 11340, 127, 1746, 689, 507, 334, 1012, 87, 2840, 81,~
 $ category          <chr> "Movies", "Horror", "Classics", "Documentary", "Family", "Classics", "Sci-Fi/Fantasy", "Movies", "Comedy", "Horror", "Mov~
+$ channel_length    <int> 36, 15, 11, 9, 10, 13, 9, 12, 7, 8, 17, 17, 15, 36, 18, 4, 34, 8, 18, 13, 9, 10, 15, 12, 9, 14, 6, 17, 9, 13, 14, 7, 9, 1~
 ```
