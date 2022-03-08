@@ -35,6 +35,10 @@ youtube <- youtube %>%
 
 ## Exploratory Data Analysis
 
+### Univariate
+
+We will start by looking at the distributions for the response variable and each of the predictor variables.
+
 ```{r}
 ggplot(data = youtube, aes(view_count)) + 
   geom_histogram(bins = 100) +
@@ -224,7 +228,7 @@ p24 + p25 + p26
 
 ### Bivariate
 
-Now we will explore the interaction between some of these variables and the log view count.
+Now we will explore the relationship between our predictor variables and our response variable. As we discussed earlier, we will be using `log_views` instead of `view_count` as our response since we wish to conduct inference.
 
 ```{r}
 b1 <- ggplot(data = youtube, aes(x = likes, y = log_views)) +
@@ -242,7 +246,7 @@ b4 <- ggplot(data = youtube, aes(x = comment_count, y = log_views)) +
 b1+b2+b3+b4
 ```
 
-We might expect a linear relationship between likes/dislikes and the number of views. Since we took the log of views, then if we were to include likes and dislikes in our model, we might want to also take the log of likes and dislikes so we can preserved this relationship.
+We might expect a linear relationship between likes/dislikes and the number of views. Since we took the log of views, then if we were to include likes and dislikes in our model, we might want to also take the log of likes and dislikes so we can preserved this relationship. This will likely be true for other variables as well such as subscriber count.
 
 ```{r}
 b5 <- ggplot(data = youtube, aes(x = comments_disabled, y = log_views)) +
@@ -306,7 +310,8 @@ b13+b14+b15
 
 ```{r}
 b15 <- ggplot(data = youtube, aes(x = weekday_published, y = log_views)) +
-  geom_boxplot()
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90))
 
 b16 <- ggplot(data = youtube, aes(x = day_published, y = log_views)) +
   geom_boxplot()
@@ -315,16 +320,20 @@ b17 <- ggplot(data = youtube, aes(x = hour_published, y = log_views)) +
   geom_boxplot()
 
 b18 <- ggplot(data = youtube, aes(x = video_length, y = log_views)) +
-  geom_point()
+  geom_point(alpha = 0.2)
 
 b19 <- ggplot(data = youtube, aes(x = category, y = log_views)) +
-  geom_boxplot()
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90))
 
 b20 <- ggplot(data = youtube, aes(x = trending_age, y = log_views)) + 
   geom_boxplot()
 
 b15+b16+b17+b18+b19+b20
 ```
+
+It looks like `trending_age` and `log_views` have an association. This is expected since older videos will have had more time to get more views. 
+
 ```{r}
 b21 <- ggplot(data = youtube, aes(x = subscriberCount, y = log_views)) +
   geom_point()
@@ -335,6 +344,9 @@ b22 <- ggplot(data = youtube, aes(x = videoCount, y = log_views)) +
 b21+b22
 ```
 
+### Multivariate
+
+Now we will explore some of the interactions between our predictor variables.
 
 ## Transforming our Data
 
