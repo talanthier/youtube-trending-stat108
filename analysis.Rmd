@@ -32,8 +32,26 @@ youtube <- youtube %>%
          weekday_published = as.factor(weekday_published))
 ```
 
+We will now drop some of the columns which we will not use in our analysis. 
+
+```{r}
+youtube <- subset(youtube, select = -c(video_id, channelId, categoryId, tags, description, title, channelTitle))
+```
+
 
 ## Exploratory Data Analysis
+
+Let's start by checking for missing values. When generating some of the features, we automatically dropped videos which no longer exist anymore. 
+```{r}
+colSums(is.na(youtube))
+```
+The only column with missing values is `subscriberCount`. When using the Youtube API to access subscriber counts, for channels with hidden subscriber counts, we decided to input those values of `subscriberCount` as missing. Seeing as we have so few observations, we will drop these from the dataset.
+
+```{r}
+youtube <- youtube %>%
+  drop_na()
+```
+
 
 ### Univariate
 
@@ -205,25 +223,6 @@ p22 + p23
 
 ```
 
-Note that one measurement of how successful a video may be is the number of view relative to subscriber count. We will let `view_diff` be the difference in views and the number of channel subscribers. We will let `view_diff_std` be `view_diff` divided by the subscriber count.
-
-```{r}
-youtube <- youtube %>%
-  mutate(view_diff_std = (view_count - subscriberCount)/subscriberCount, 
-         view_diff = view_count - subscriberCount)
-
-p24 <- ggplot(data = youtube, aes(view_diff)) +
-  geom_histogram(bins = 50) +
-  labs(x = 'View Difference', title = 'Distribution of Difference of Views and Subscriber Count')
-
-p25 <- ggplot(data = youtube, aes(view_diff_std)) +
-  geom_histogram(bins = 30)
-
-p26 <- ggplot(data = youtube, aes(videoCount)) +
-  geom_histogram(bins = 50)
-
-p24 + p25 + p26
-```
 
 
 ### Bivariate
@@ -347,6 +346,48 @@ b21+b22
 ### Multivariate
 
 Now we will explore some of the interactions between our predictor variables.
+
+
+```{r}
+m1 <- ggplot(data = youtube, aes(x = subscriberCount, y = videoCount, color = log_views)) +
+  geom_point()
+
+m2 <- ggplot(data = youtube, aes(x = subscriberCount, y = video_length, color = log_views)) +
+  geom_point()
+
+m3 <- ggplot(data = youtube, aes(x = subscriberCount, y = trending_age, color = log_views)) +
+  geom_boxplot()
+
+m4 <- ggplot(data = youtube, aes(x = subscriberCount, y = category, color = log_views)) +
+  geom_boxplot()
+
+m1 + m2
+m3 + m4
+  
+```
+
+```{r}
+m5 <- ggplot(data = youtube, aes(x = subscriberCount, y = desc_length, color = log_views)) +
+  geom_point()
+
+m6 <- ggplot(data = youtube, aes(x = subscriberCount, y = title_length, color = log_views)) +
+  geom_point()
+
+m7 <- ggplot(data = youtube, aes(x = subscriberCount, y = num_tags, color = log_views)) +
+  geom_point()
+
+m5+m6
+m7
+```
+
+```{r}
+m7 <- ggplot(data = youtube, aes(x = title_length, y = desc_length, color = log_views)) +
+  geom_point()
+
+m8 <- ggplot(data = youtube, aes(x = title_length, y =, color = log_views)) +
+  geom_point()
+```
+
 
 ## Transforming our Data
 
