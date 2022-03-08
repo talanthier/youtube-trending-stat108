@@ -3,11 +3,11 @@
 Repository for final project of STAT 108: Linear Regression
 
 ### Proposal
-In this repository, I wish to explore how certain characteristics of a youtube video such as its title, upload time affect the success of a video such as a video's viewcount. One question is whether certain clickbait strategies applied to titles of thumbnails of videos really affect the view count of a video. Additionally do these strategies affect how viewers perceive the video. For example, do videos with clickbait titles end up having a lower like to dislike ratio? I would suspect that specific ways of formatting titles is associated with an increased viewcount. Simultaneously, I suspect these types of strategies used to grab a viewer's attention adversly affects the video's like to dislike ratio.
+In this project, we wish to explore how certain characteristics of a trending youtube videos affects its viewcount. We plan on checking whether video lengths, times of uploads,  length of titles, etc. affect the number of views a video gets. We would suspect that certain titling strategies like putting titles in all caps. We also think that the length of a video as well as the number of tags will be positively associated with the number of views a video gets.
 
-The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtube-trending-video-dataset?select=RU_youtube_trending_data.csv). The dataset includes all videos that have been trending starting from August of 2020 and includes data on all trending videos up to the present. We have decided only to include trending videos from the US. For the purpose of this project, the data we will use is a simple random sample from the US trending videos dataset. We have also removed the description column as it will not be used in the analysis.
+The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtube-trending-video-dataset?select=RU_youtube_trending_data.csv). The dataset includes all videos that have been trending starting from August of 2020 and includes data on all trending videos up to the present. We have decided only to include trending videos from the US. For the purpose of this project, the data we will use is a simple random sample from the US trending videos dataset. In addition to the variables from the original dataset, we have added a number of different variables. Using the titles and description we have variables such as title and description length. We also used the Youtube API using the provided video and channel IDs to get the number of subscribers and videos on each channel as well as the length of videos.
 
-Structure of the Dataset is shown below. See data folder for more information on the dataset.
+The structure of the Dataset is shown below. See the data folder for more information on the dataset.
 ```
 Rows: 982
 Columns: 32
