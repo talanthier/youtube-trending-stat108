@@ -227,7 +227,19 @@ p22 + p23
 
 ### Bivariate
 
-Now we will explore the relationship between our predictor variables and our response variable. As we discussed earlier, we will be using `log_views` instead of `view_count` as our response since we wish to conduct inference.
+Now we will explore the relationship between our predictor variables and our response variable. As we discussed earlier, we will be using `log_views` instead of `view_count` as our response since we wish to conduct inference. We will start by observing the correlations for some of the numerical data.
+
+```{r}
+library(Hmisc)
+
+youtube_num <- youtube %>%
+  subset(select = -c(publishedAt, trending_date, comments_disabled, ratings_disabled, weekday_published, category))
+
+cor(youtube_num)
+```
+Looking at the correlations, we unsurprisingly see some moderate correlation between `log_views` and `likes`, `dislikes`, and `comment_count`. This is unsurprising as naturally videos which have more viewers will have more people rating and commenting on the video. But much like with view count, the likes, dislikes, and comment count on a video will not be observed until after it has been uploading. Since we want to focus on predictor variables that are known at or before the video is uploaded, we will not use these.
+
+Of the variables which are useful in this sense, we see the channel's subscriber count has a moderate postive correlation of 0.484 with `log_views`. We also see that the number of exclamation points has a weak negative correlation as well as the length of the description.
 
 ```{r}
 b1 <- ggplot(data = youtube, aes(x = likes, y = log_views)) +
@@ -257,8 +269,9 @@ b6 <- ggplot(data = youtube, aes(x = ratings_disabled, y = log_views)) +
 b5 + b6
 ```
 
-Since we have so few possible values for the following variables, we will convert them to factors.
+It looks like disabling ratings might have an effect on `log_views` shown by the different means across videos with disabled and enabled ratings. There is also a small difference in means for videos with comments disabled.
 
+For the sake of plotting some of these variables, we will convert the following variables to factors. 
 ```{r}
 youtube <- youtube %>%
   mutate(num_exc = as.factor(num_exc),
@@ -269,6 +282,7 @@ youtube <- youtube %>%
          trending_age = as.factor(trending_age),
          day_published = as.factor(day_published))
 ```
+
 
 
 
@@ -294,18 +308,22 @@ b12 <- ggplot(data = youtube, aes(x = num_dollar, y = log_views)) +
 b7+b8+b9+b10+b11+b12
 ```
 
+Here it looks like the `num_qm` has little to no predictive power. But we do see there is quite a bit of variability for `log_views` across the groups for `num_dollar`, `num_period`, and `num_exc`. Also there might be a weak downward trend for `num_caps` as well. Meanwhile `num_tags` looks completely random. So the number of tags doesn't appear to help us.
+
 ```{r}
 b13 <- ggplot(data = youtube, aes(x = title_length, y = log_views)) +
-  geom_point()
+  geom_point(alpha = 0.4)
 
 b14 <- ggplot(data = youtube, aes(x = desc_length, y = log_views)) +
-  geom_point()
+  geom_point(alpha = 0.4)
 
 b15 <- ggplot(data = youtube, aes(x = channel_length, y = log_views)) +
-  geom_point()
+  geom_point(alpha = 0.4)
 
 b13+b14+b15
 ```
+Here, the scatterplot for `title_length` looks quite random, as does the scatterplot for `channel_length`. Meanwhile there looks like there might be a weak positive trend for `desc_length`.
+
 
 ```{r}
 b15 <- ggplot(data = youtube, aes(x = weekday_published, y = log_views)) +
@@ -328,10 +346,20 @@ b19 <- ggplot(data = youtube, aes(x = category, y = log_views)) +
 b20 <- ggplot(data = youtube, aes(x = trending_age, y = log_views)) + 
   geom_boxplot()
 
-b15+b16+b17+b18+b19+b20
+b15+b16+b17
+b18+b19+b20
 ```
 
-It looks like `trending_age` and `log_views` have an association. This is expected since older videos will have had more time to get more views. 
+It looks like `trending_age` and `log_views` have an association. This is expected since older videos will have had more time to get more views. That being said, the uploader will not know whether a video will trend or how long it takes to get to trending so it would not make sense to include it in our model. As for the category it looks like `log_views` varies quite a bit between different categories. Hence it might be useful to consider it in our model. For `video_length` it is hard to tell whether there is a relationship. We will construct another plot with adjusted limits
+
+```{r}
+ggplot(data = youtube, aes(x = video_length, y = log_views)) +
+  geom_point(alpha = 0.3) +
+  xlim(0,3000)
+```
+It is hard to tell whether there is a relationship between `log_views` and `video_length`. If anything, there is a very weak negative relationship between `video_length` and `log_views`, but it is hard to tell due to the difference in variability between short and long videos.
+
+
 
 ```{r}
 b21 <- ggplot(data = youtube, aes(x = subscriberCount, y = log_views)) +
@@ -343,9 +371,19 @@ b22 <- ggplot(data = youtube, aes(x = videoCount, y = log_views)) +
 b21+b22
 ```
 
+As we noted earlier, it looks like there may be a postive relationship between `subscriberCount` and `log_views`. Meanwhile `videoCount` doesn't seem to be all that useful. Just to check, we will adjust the limits of our plot to get a clearer picture.
+
+```{r}
+ggplot(data = youtube, aes(x = videoCount, y = log_views)) +
+  geom_point(alpha = 0.3)+
+  xlim(0,10000)
+```
+
+Based off of this second plot, `videoCount` still does not appear to be all that useful. It doesn't look like the number of video's a channel has affects the number of views a trending video might have. 
+
 ### Multivariate
 
-Now we will explore some of the interactions between our predictor variables.
+Now that we have identified some predictor variables that may be useful, we will explore some of the relationships between them.
 
 
 ```{r}
@@ -398,9 +436,24 @@ It looks like the log transformation has done a pretty good job of making our da
 As discussed earlier, the distribution for `view_count` is heavily skewed. Since the purpose of our analysis is to conduct inference on our model, we would like our response variable to be approximately normally distributed. Hence we will be using `log_views` instead of `view_count` in our final model. As for the predictor variables, we only want to include predictor variables that the uploader might have knowledge of before uploading. So we will not be using variables such as `likes`, `dislikes`, and `trending_age` since the uploader will not know the values of these variables until the video is uploaded. 
 
 ```{r}
-test_model <- lm(view_diff ~ category + video_length + num_tags + num_caps + weekday_published + day_published + trending_age + hour_published + video_length + num_exc + num_qm + num_period + num_dollar + subscriberCount, data = youtube)
+full_model <- lm(log_views ~ comments_disabled + ratings_disabled + num_tags + num_caps + num_exc + num_qm + 
+                   num_period + num_dollar + title_length + desc_length + weekday_published + day_published + 
+                   hour_published + video_length + subscriberCount + videoCount + category + channel_length,
+                 data = youtube)
 
+summary(full_model)
+
+test_model <- lm(log_views ~ category, data = youtube)
 summary(test_model)
+```
+```{r}
+library(Hmisc)
+```
+```{r}
+res <- cor(youtube)
+```
+```{r}
+library(PerformanceAnalytics)
 ```
 
 
