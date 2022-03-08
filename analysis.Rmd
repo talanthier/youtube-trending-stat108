@@ -340,7 +340,9 @@ b21+b22
 
 It looks like the log transformation has done a pretty good job of making our data more normally distributed. While not perfect, this might allow us to conduct inference on Log View Count. If we wish to use things likes and dislikes in our model, it would be wise to transform those as well.
 
-## Models
+## Modeling
+
+As discussed earlier, the distribution for `view_count` is heavily skewed. Since the purpose of our analysis is to conduct inference on our model, we would like our response variable to be approximately normally distributed. Hence we will be using `log_views` instead of `view_count` in our final model. As for the predictor variables, we only want to include predictor variables that the uploader might have knowledge of before uploading. So we will not be using variables such as `likes`, `dislikes`, and `trending_age` since the uploader will not know the values of these variables until the video is uploaded. 
 
 ```{r}
 test_model <- lm(view_diff ~ category + video_length + num_tags + num_caps + weekday_published + day_published + trending_age + hour_published + video_length + num_exc + num_qm + num_period + num_dollar + subscriberCount, data = youtube)
@@ -349,4 +351,5 @@ summary(test_model)
 ```
 
 
+## Checking Assumptions
 
