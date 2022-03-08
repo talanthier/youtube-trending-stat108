@@ -490,13 +490,32 @@ LIST: subscriberCount, category, comments_disabled, ratings_disabled, num_caps, 
 ```
 
 
-## Transforming our Data
-
-It looks like the log transformation has done a pretty good job of making our data more normally distributed. While not perfect, this might allow us to conduct inference on Log View Count. If we wish to use things likes and dislikes in our model, it would be wise to transform those as well.
-
 ## Modeling
 
-As discussed earlier, the distribution for `view_count` is heavily skewed. Since the purpose of our analysis is to conduct inference on our model, we would like our response variable to be approximately normally distributed. Hence we will be using `log_views` instead of `view_count` in our final model. As for the predictor variables, we only want to include predictor variables that the uploader might have knowledge of before uploading. So we will not be using variables such as `likes`, `dislikes`, and `trending_age` since the uploader will not know the values of these variables until the video is uploaded. 
+As discussed earlier, the distribution for `view_count` is heavily skewed. Since the purpose of our analysis is to conduct inference on our model, we would like our response variable to be approximately normally distributed. Hence we will be using `log_views` instead of `view_count` for our predictions. As for the predictor variables, we only want to include predictor variables that the uploader might have knowledge of before uploading. So we will not be using variables such as `likes`, `dislikes`, and `trending_age` since the uploader will not know the values of these variables until the video is uploaded. This narrows down the variables we can use considerably. From our EDA, we noticed the following variables might be useful for predicting the log view count:
+
+`subscriberCount`, `category`, `comments_disabled`, `ratings_disabled`, `num_caps`, `num_exc`, `num_period`, `num_dollar`, `desc_length`, `hour_published`, `day_published`
+
+We can quickly build a model to predict `log_views` with these predictor variables with no interaction terms.
+
+```{r}
+test_youtube_data <- youtube %>%
+  mutate(num_exc = as.integer(num_exc),
+         num_period = as.integer(num_period),
+         num_dollar = as.integer(num_dollar),
+         hour_published = as.integer(hour_published),
+         day_published = as.integer(day_published))
+```
+
+
+```{r}
+model1 <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + day_published, data = test_youtube_data)
+
+summary(model1)
+```
+
+
+
 
 ```{r}
 full_model <- lm(log_views ~ comments_disabled + ratings_disabled + num_tags + num_caps + num_exc + num_qm + 
