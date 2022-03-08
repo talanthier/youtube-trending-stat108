@@ -1,0 +1,352 @@
+---
+title: "STAT 108: Final Project Analysis"
+author: "Tim Lanthier"
+date: "2/8/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Youtube Analysis
+```{r message=FALSE}
+library(tidyverse)
+library(knitr)
+library(patchwork)
+library(broom)
+library(leaps)
+```
+
+
+```{r}
+youtube <- read.csv('data/youtube_data.csv') %>%
+  subset(select = -c(X)) # removed redundant X column
+glimpse(youtube)
+```
+We will need to change the types of a few of the variables.
+```{r}
+youtube <- youtube %>%
+  mutate(trending_date = as.Date(trending_date),  # strip time since all trending dates recorded at time 0
+         publishedAt = as.POSIXct(publishedAt),
+         weekday_published = as.factor(weekday_published))
+```
+
+
+## Exploratory Data Analysis
+
+```{r}
+ggplot(data = youtube, aes(view_count)) + 
+  geom_histogram(bins = 100) +
+  labs(x = 'View Count', title = 'Distribution of View Count')
+
+summarise(youtube, mean = mean(view_count), 
+          std_dev = sd(view_count),
+          min = min(view_count),
+          q1 = quantile(view_count, 0.25),
+          median = median(view_count),
+          q3 = quantile(view_count, 0.75),
+          max = max(view_count),
+          IQR = q3-q1)
+```
+
+Looking at the histogram for view count, we see that the distribution is heavily positively skewed. We also have quite a few outliers. Since we wish to conduct inference, we will be looking at the looking at the log view count.
+
+```{r}
+youtube <- youtube %>%
+  mutate(log_views = log(view_count))
+
+ggplot(data = youtube, aes(log_views))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Log View Count', title = 'Distribution of Log View Count')
+```
+We also will investigate the like to dislike ratio. Note that to avoid division by 0, if we have a video with no dislikes, we will let the like to dislike ratio just be the number of likes.
+
+```{r}
+youtube <- youtube %>%
+  mutate(like_dislike_ratio = ifelse(dislikes == 0, likes, likes/dislikes)) # avoid division by 0
+```
+
+
+```{r}
+p1 <- ggplot(data = youtube, aes(likes))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Number of Likes', title = 'Distribution of Likes')
+
+p2 <- ggplot(data = youtube, aes(dislikes))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Number of Dislikes', title = 'Distribution of Dislikes')
+
+p3 <- ggplot(data = youtube, aes(like_dislike_ratio))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Like to Dislike Ratio', title = 'Distribution of Like to Dislike Ratio')
+
+p4 <- ggplot(data = youtube, aes(comment_count)) +
+  geom_histogram(bins = 30) +
+  labs(x = 'Comment Count', title = 'Distribution of Comment Count')
+
+p1 + p2 + p3 + p4
+```
+```{r}
+ggplot(data = youtube, aes(desc_length)) +
+  geom_histogram(bins = 30) +
+  labs(x = 'Length of Description', title = 'Distribution of Description Length')
+
+ggplot(data = youtube, aes(channel_length)) +
+  geom_histogram(binwidth = 1)
+```
+
+
+Considering that view count is positively skewed, it is no surprise that the likes, dislikes, and comment count is also positively skewed. Now we will investigate some of the predictors based on the title.
+
+```{r}
+p5 <- ggplot(data = youtube, aes(num_caps))+
+  geom_histogram(bins = 30)+
+  labs(x = 'Number of Capitals Letters in Title')
+p6 <- ggplot(data = youtube, aes(num_exc))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Number of ! in Title')
+p7 <- ggplot(data = youtube, aes(num_qm))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Number of ? in Title')
+p8 <- ggplot(data = youtube, aes(num_period))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Number of Periods in Title')
+p9 <- ggplot(data = youtube, aes(num_dollar))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Number of $ in Title')
+p10 <- ggplot(data = youtube, aes(title_length))+
+  geom_histogram(bins = 30)+
+  labs(x = 'Length of Title')
+p5+p6+p7+p8+p9+p10
+```
+
+
+
+```{r}
+p11 <- ggplot(data = youtube, aes(video_length)) +
+  geom_histogram(binwidth = 60) +
+  labs(x = 'Video Length (Sec)', title = 'Distribution of Video Length')
+
+p12 <- ggplot(data = youtube, aes(num_tags))+
+  geom_histogram(binwidth = 10)+
+  labs(x = 'Tags', title = 'Distribution of Number of Tags')
+
+p13 <- ggplot(data = youtube, aes(category)) +
+  geom_bar() +
+  labs(x = 'Category', title = 'Distribution of Category') + 
+  theme(axis.text.x = element_text(angle = 90))
+
+p11 + p12 + p13
+```
+```{r}
+p14 <- ggplot(data = youtube, aes(comments_disabled))+
+  geom_bar()+
+  labs(x = 'Comments Disabled', title = 'Distribution of Comments Disabled')
+
+p15 <- ggplot(data = youtube, aes(ratings_disabled))+
+  geom_bar()+
+  labs(x = 'Ratings Disabled', title = 'Distribution of Comments Disabled')
+
+p14 + p15
+```
+
+```{r}
+p16 <- ggplot(data = youtube, aes(trending_date))+
+  geom_histogram(binwidth = 14) +
+  labs(title = 'Distribution of Trending Date', x = 'Trending Date')
+
+p17<- ggplot(data = youtube, aes(publishedAt))+
+  geom_histogram(binwidth = 14*60*60*24)+ # 2 week bin width
+  labs(x = 'Date Published', title = 'Distribution of Date Published')
+
+p16 + p17
+```
+```{r}
+levels(youtube$weekday_published) = c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday')
+```
+
+
+
+```{r}
+p18 <- ggplot(data = youtube, aes(weekday_published))+
+  geom_bar() +
+  labs(x = 'Weekday Published', title = 'Distribution of Weekday Published')
+
+p19 <-ggplot(data = youtube, aes(day_published)) +
+  geom_histogram(binwidth = 1) +
+  labs(x = 'Day Published', title = 'Distribution of Day Published')
+  
+p20 <- ggplot(data = youtube, aes(hour_published))+
+  geom_bar(binwidth = 1) +
+  labs(x = 'Hour Published', title = 'Distribution of Hour Published')
+
+p21 <- ggplot(data = youtube, aes(trending_age))+
+  geom_bar(binwidth = 1) +
+  labs(x = 'TrendingAge', title = 'Distribution of Trending Age')
+
+p18 + p19 + p20 + p21
+```
+Note that according to Youtube API, time and dates are in UTC time zone.
+
+```{r}
+p22 <- ggplot(data = youtube, aes(subscriberCount))+
+  geom_histogram(bins = 30) +
+  labs(x = 'Subscriber Count', title = 'Distribution of Subscriber Count')
+p23 <- ggplot(data = youtube, aes(videoCount)) +
+  geom_histogram(bins = 50) +
+  labs(x = 'Number of Videos on Channel', title = 'Distribution of Video Count')
+
+p22 + p23
+
+```
+
+Note that one measurement of how successful a video may be is the number of view relative to subscriber count. We will let `view_diff` be the difference in views and the number of channel subscribers. We will let `view_diff_std` be `view_diff` divided by the subscriber count.
+
+```{r}
+youtube <- youtube %>%
+  mutate(view_diff_std = (view_count - subscriberCount)/subscriberCount, 
+         view_diff = view_count - subscriberCount)
+
+p24 <- ggplot(data = youtube, aes(view_diff)) +
+  geom_histogram(bins = 50) +
+  labs(x = 'View Difference', title = 'Distribution of Difference of Views and Subscriber Count')
+
+p25 <- ggplot(data = youtube, aes(view_diff_std)) +
+  geom_histogram(bins = 30)
+
+p26 <- ggplot(data = youtube, aes(videoCount)) +
+  geom_histogram(bins = 50)
+
+p24 + p25 + p26
+```
+
+
+### Bivariate
+
+Now we will explore the interaction between some of these variables and the log view count.
+
+```{r}
+b1 <- ggplot(data = youtube, aes(x = likes, y = log_views)) +
+  geom_point()
+
+b2 <- ggplot(data = youtube, aes(x = dislikes, y = log_views)) +
+  geom_point()
+
+b3 <- ggplot(data = youtube, aes(x = like_dislike_ratio, y = log_views)) +
+  geom_point()
+
+b4 <- ggplot(data = youtube, aes(x = comment_count, y = log_views)) +
+  geom_point()
+
+b1+b2+b3+b4
+```
+
+We might expect a linear relationship between likes/dislikes and the number of views. Since we took the log of views, then if we were to include likes and dislikes in our model, we might want to also take the log of likes and dislikes so we can preserved this relationship.
+
+```{r}
+b5 <- ggplot(data = youtube, aes(x = comments_disabled, y = log_views)) +
+  geom_boxplot()
+
+b6 <- ggplot(data = youtube, aes(x = ratings_disabled, y = log_views)) +
+  geom_boxplot()
+
+b5 + b6
+```
+
+Since we have so few possible values for the following variables, we will convert them to factors.
+
+```{r}
+youtube <- youtube %>%
+  mutate(num_exc = as.factor(num_exc),
+         num_qm = as.factor(num_qm),
+         num_period = as.factor(num_period),
+         num_dollar = as.factor(num_dollar),
+         hour_published = as.factor(hour_published), # convert back after eda
+         trending_age = as.factor(trending_age),
+         day_published = as.factor(day_published))
+```
+
+
+
+```{r}
+b7 <- ggplot(data = youtube, aes(x = num_tags, y = log_views)) +
+  geom_point()
+
+b8 <- ggplot(data = youtube, aes(x = num_caps, y = log_views)) +
+  geom_point()
+
+b9 <- ggplot(data = youtube, aes(x = num_exc, y = log_views)) +
+  geom_boxplot()
+
+b10 <- ggplot(data = youtube, aes(x = num_qm, y = log_views)) +
+  geom_boxplot()
+
+b11 <- ggplot(data = youtube, aes(x = num_period, y = log_views)) +
+  geom_boxplot()
+
+b12 <- ggplot(data = youtube, aes(x = num_dollar, y = log_views)) +
+  geom_boxplot()
+
+b7+b8+b9+b10+b11+b12
+```
+
+```{r}
+b13 <- ggplot(data = youtube, aes(x = title_length, y = log_views)) +
+  geom_point()
+
+b14 <- ggplot(data = youtube, aes(x = desc_length, y = log_views)) +
+  geom_point()
+
+b15 <- ggplot(data = youtube, aes(x = channel_length, y = log_views)) +
+  geom_point()
+
+b13+b14+b15
+```
+
+```{r}
+b15 <- ggplot(data = youtube, aes(x = weekday_published, y = log_views)) +
+  geom_boxplot()
+
+b16 <- ggplot(data = youtube, aes(x = day_published, y = log_views)) +
+  geom_boxplot()
+
+b17 <- ggplot(data = youtube, aes(x = hour_published, y = log_views)) +
+  geom_boxplot()
+
+b18 <- ggplot(data = youtube, aes(x = video_length, y = log_views)) +
+  geom_point()
+
+b19 <- ggplot(data = youtube, aes(x = category, y = log_views)) +
+  geom_boxplot()
+
+b20 <- ggplot(data = youtube, aes(x = trending_age, y = log_views)) + 
+  geom_boxplot()
+
+b15+b16+b17+b18+b19+b20
+```
+```{r}
+b21 <- ggplot(data = youtube, aes(x = subscriberCount, y = log_views)) +
+  geom_point()
+
+b22 <- ggplot(data = youtube, aes(x = videoCount, y = log_views)) +
+  geom_point()
+
+b21+b22
+```
+
+
+## Transforming our Data
+
+It looks like the log transformation has done a pretty good job of making our data more normally distributed. While not perfect, this might allow us to conduct inference on Log View Count. If we wish to use things likes and dislikes in our model, it would be wise to transform those as well.
+
+## Models
+
+```{r}
+test_model <- lm(view_diff ~ category + video_length + num_tags + num_caps + weekday_published + day_published + trending_age + hour_published + video_length + num_exc + num_qm + num_period + num_dollar + subscriberCount, data = youtube)
+
+summary(test_model)
+```
+
+
+
