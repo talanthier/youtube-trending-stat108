@@ -18,12 +18,14 @@ $ comment_count     <int> number of dislikes
 $ thumbnail_link    <chr> link to thumbnail image 
 $ comments_disabled <chr> comments are disabled (T/F) 
 $ ratings_disabled  <chr> ratings are disablsed (T/F)
+$ description       <chr> video description
 $ num_tags          <int> number of tags
 $ num_caps          <int> number of capital letters in title
 $ num_exc           <int> number of exclamation points in title
 $ num_qm            <int> number of question marks in title
 $ num_period        <int> number of periods in title
 $ num_dollar        <int> number of dollar signs in title
+$ desc_length       <dbl> length of description (characters)
 $ title_length      <int> length of title (characters)
 $ weekday_published <int> day of week published (0 = Monday, 1 = Tuesday, ..., 6 = Sunday
 $ day_published     <int> day of month published
@@ -33,4 +35,5 @@ $ video_length      <dbl> length of video in seconds
 $ subscriberCount   <int> number of channel subscribers (approx)
 $ videoCount        <int> number of videos on channel
 $ category          <chr> category of video
+$ channel_length    <int> length of channel name (characters)
 ```
