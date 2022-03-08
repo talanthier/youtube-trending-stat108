@@ -2,7 +2,7 @@
 The dataset used in our analysis is sampled_data.csv. This is a random sample of 1000 videos from the Kaggle data linked. Each row represents a single video which has hit trending on Youtube. Some videos have been removed since they no longer exist. The original dataset can be found through [Kaggle](https://www.kaggle.com/rsrishav/youtube-trending-video-dataset?select=RU_youtube_trending_data.csv). All variables after `ratings_disabled` were not included in the original dataset. The code for obtaining these variables can be found in [feature_generation.ipynb](feature_generation.ipynb). `video_length`, `subscriberCount`, and `videoCount` were obtained through the Youtube API. All other variables were obtained from performing operations on the original dataset.
 ```
 Rows: 982
-Columns: 29
+Columns: 32
 $ video_id          <chr> video id 
 $ title             <chr> video title 
 $ publishedAt       <chr> date and time published
