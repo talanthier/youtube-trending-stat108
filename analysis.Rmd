@@ -393,9 +393,12 @@ b25 <- ggplot(data = youtube, aes(x = day_published, y =log_views)) +
   geom_boxplot()
 
 b24+b23/b25
+
+youtube %>% group_by(weekday_published) %>%
+  summarise(across(log_views, mean))
 ```
 
-Here it looks like the day of the week in which the video was  doesn't appear to have much of a relationship with `log_views` as the mean of `log_views` is consistent across all days of the week. Meanwhile there is quite a bit of variability in `log_views` across `hour_published`. So `hour_published` might be useful in our model. The same could be said about `day_published` as well.
+Here it looks like the day of the week might be useful in predicting `log_views`. While the boxplot doesn't look all that helpful, looking at the means across the weekdays, `log_views` for Friday and Saturday are closer to around 14.2 while that mean is closer to 13.8 for Mondays and Tuesdays. While this seems like a very small difference, this is in fact a $e^{14.2}-e^{13.8} = 484255$ view difference which is quite substantial. Looking at the box plots, there is quite a bit of variability in `log_views` across `hour_published`. So `hour_published` might be useful in our model. The same could be said about `day_published` as well.
 
 ### Multivariate
 
@@ -486,7 +489,27 @@ Looking at these plots, it looks like the the video category is related to many 
 LIST: subscriberCount, category, comments_disabled, ratings_disabled, num_caps, num_exc, num_period, num_dollar, desc_length, hour_published, day_published
 
 ```{r}
+m19 <- ggplot(data = youtube, aes(fill = ratings_disabled, y = comments_disabled)) +
+  geom_bar(position = 'fill')
 
+m20 <- ggplot(data = youtube, aes(x = num_caps, y = comments_disabled)) +
+  geom_boxplot()
+
+m21 <- ggplot(data = youtube, aes(fill = num_exc, y = comments_disabled)) +
+  geom_bar(position = 'fill')
+
+m22 <- ggplot(data = youtube, aes(fill = num_period, y = comments_disabled)) +
+  geom_bar(position = 'fill')
+
+m23 <- ggplot(data = youtube, aes(fill = num_dollar, y = comments_disabled)) +
+  geom_bar(position = 'fill')
+
+m24 <- ggplot(data = youtube, aes(x = desc_length, y = comments_disabled)) +
+  geom_boxplot()
+
+m19+m20
+m21+m22
+m23+m24
 ```
 
 
@@ -494,27 +517,40 @@ LIST: subscriberCount, category, comments_disabled, ratings_disabled, num_caps, 
 
 As discussed earlier, the distribution for `view_count` is heavily skewed. Since the purpose of our analysis is to conduct inference on our model, we would like our response variable to be approximately normally distributed. Hence we will be using `log_views` instead of `view_count` for our predictions. As for the predictor variables, we only want to include predictor variables that the uploader might have knowledge of before uploading. So we will not be using variables such as `likes`, `dislikes`, and `trending_age` since the uploader will not know the values of these variables until the video is uploaded. This narrows down the variables we can use considerably. From our EDA, we noticed the following variables might be useful for predicting the log view count:
 
-`subscriberCount`, `category`, `comments_disabled`, `ratings_disabled`, `num_caps`, `num_exc`, `num_period`, `num_dollar`, `desc_length`, `hour_published`, `day_published`
+`subscriberCount`, `category`, `comments_disabled`, `ratings_disabled`, `num_caps`, `num_exc`, `num_period`, `num_dollar`, `desc_length`, `hour_published`, `weekday_published`
 
-We can quickly build a model to predict `log_views` with these predictor variables with no interaction terms.
+We can quickly build a model to predict `log_views` with these predictor variables with no interaction terms. But as we noted in the Exploratory data analysis, there seems to be a weak linear relationship between `num_exc`, `num_period`, `num_dollar` and `log_views`. So we will consider 2 separate models: one with those variables as factors, the other with those variables as integers. For the model with those variables treated as integers, we will use the data `youtube_int`.
 
 ```{r}
-test_youtube_data <- youtube %>%
+youtube_int <- youtube %>%
   mutate(num_exc = as.integer(num_exc),
          num_period = as.integer(num_period),
-         num_dollar = as.integer(num_dollar),
-         hour_published = as.integer(hour_published),
-         day_published = as.integer(day_published))
+         num_dollar = as.integer(num_dollar))
 ```
 
+Now we will create 2 models both using all of the variables we mentioned above. In `full_model_factor`, we will treat `num_exc`, `num_period`, and `num_dollar` as factors. In `full_model_int` they will be treated as integers.
 
 ```{r}
-model1 <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + day_published, data = test_youtube_data)
+full_model_factor <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + weekday_published + day_published, data = youtube)
 
-summary(model1)
+full_model_int <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + weekday_published + day_published, data = youtube_int)
+
+glance(full_model_factor)
+glance(full_model_int)
 ```
 
+Looking at the AIC and BIC of our 2 models, it looks like our model with `full_model_int` is considered better. This isn't super surprising as they have fairly close values of $R^2$ but `full_model_factor` has 91 degrees of freedom compared to `full_model_int` with only 80. Seeing as AIC and BIC penalizes more complex models, this is expected. Since the difference in $R^2$ is still fairly small, we will be building off of `full_model_int`.
 
+```{r}
+youtube <- youtube_int
+```
+
+Consider the model output of `full_model_int`.
+
+```{r}
+tidy(full_model_int, conf.int = TRUE) %>%
+  kable(digits = 3, format = 'markdown')
+```
 
 
 ```{r}
@@ -524,19 +560,9 @@ full_model <- lm(log_views ~ comments_disabled + ratings_disabled + num_tags + n
                  data = youtube)
 
 summary(full_model)
+glance(full_model)
+```
 
-test_model <- lm(log_views ~ category, data = youtube)
-summary(test_model)
-```
-```{r}
-library(Hmisc)
-```
-```{r}
-res <- cor(youtube)
-```
-```{r}
-library(PerformanceAnalytics)
-```
 
 
 ## Checking Assumptions
