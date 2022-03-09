@@ -18,6 +18,12 @@ library(broom)
 library(leaps)
 ```
 
+In this project, we wish to explore how certain characteristics of a trending youtube videos affects its view count. We plan on checking whether video lengths, times of uploads, length of titles, etc. affect the number of views a video gets. We would suspect that certain titling strategies like putting titles in all caps may have an effect on the video. We also suspect that the length of a video as well as the number of tags will be positively associated with the number of views a video gets. We also would think that the time and weekday of upload will have a large effect on the number of views a trending video might have since there are certain times of the day where there are more youtube users active than usual.
+
+The dataset was obtained through Kaggle. The dataset includes all videos that have been trending starting from August of 2020 and includes data on all trending videos up to the present. We have decided only to include trending videos from the US. For the purpose of this project, the data we will use is a simple random sample from the US trending videos dataset. In addition to the variables from the original dataset, we have added a number of different variables. Using the titles and description we have variables such as title and description length. We also used the Youtube API using the provided video and channel IDs to get the number of subscribers and videos on each channel as well as the length of videos.
+
+The structure of the Dataset is shown below. See the data folder for more information on the dataset.
+
 
 ```{r}
 youtube_raw <- read.csv('data/youtube_data.csv') %>%
@@ -32,12 +38,14 @@ youtube <- youtube_raw %>%
          weekday_published = as.factor(weekday_published))
 ```
 
-We will now drop some of the columns which we will not use in our analysis. 
+We will now drop some of the columns which we will not use in our analysis. This leaves us with the following dataset.
 
 ```{r}
 youtube <- subset(youtube, select = -c(video_id, channelId, categoryId, tags, description, title, channelTitle))
-```
 
+glimpse(youtube)
+```
+As discussed, we are interested in looking at the relationship between many of these predictors and view count. But as we will discuss in the next section, in order to have our data better reflect the normal distribution, we will instead be using the log of view count as our response variable. For the description of what each variable is measuring, look in the data folder.
 
 ## Exploratory Data Analysis
 
