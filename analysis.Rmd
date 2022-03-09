@@ -20,13 +20,13 @@ library(leaps)
 
 
 ```{r}
-youtube <- read.csv('data/youtube_data.csv') %>%
+youtube_raw <- read.csv('data/youtube_data.csv') %>%
   subset(select = -c(X)) # removed redundant X column
-glimpse(youtube)
+glimpse(youtube_raw)
 ```
 We will need to change the types of a few of the variables.
 ```{r}
-youtube <- youtube %>%
+youtube <- youtube_raw %>%
   mutate(trending_date = as.Date(trending_date),  # strip time since all trending dates recorded at time 0
          publishedAt = as.POSIXct(publishedAt),
          weekday_published = as.factor(weekday_published))
@@ -583,5 +583,84 @@ The coefficients for the different categories of `weekday_published` are quite i
 
 ## Checking Assumptions
 
-Using our full model, we will check the assumptions for our model. We will start by looking at linearity
+Using our full model, we will check the assumptions for our model. 
+```{r}
+final_model_aug <- augment(final_model) %>%
+  mutate(obs_num = 1:n())
+```
+We will start by looking at Normality.
+
+```{r}
+ggplot(data = final_model_aug, aes(x =.resid)) +
+  geom_histogram(bins = 50)+
+  labs(x = 'Residuals', title = 'Distribution of Residuals')
+
+qqnorm(final_model_aug$.resid)
+qqline(final_model_aug$.resid, col = "steelblue", lwd = 2)
+```
+Looking at the histogram, it looks like the residuals follow a fairly normal shape. There is symmetry but it appears to be somewhat bimodal. Also the tails look heavier. Looking at the QQ Plot, it looks like our sample quantiles match the theoretical quantiles around near the center of the data. But at the tails the quantiles do not match. Due to the bimodality and the lack of normality in the tails, we would claim that the normality condition has not been satisfied.
+
+Next we will investigate the constant variance assumption.
+
+```{r}
+ggplot(data = final_model_aug, aes(x =.fitted, y=.resid)) +
+  geom_point()+
+  geom_hline(yintercept = 0, color = 'red') +
+  labs(x = 'Predicted Values', y = 'Residuals')
+```
+Looking at the residuals versus the predicted, it does not look like  a random scatter about 0. Instead there is very little variability for low predicted values. Meanwhile the variability with our middle to high predicted values is quite high. Hence the constant variance assumption is not satisfied.
+
+Next we will investigate linearity. We can look at same plot as above to see that there isn't much of a pattern (besides lack of constant variance).
+
+```{r}
+a1 <- ggplot(data = final_model_aug, aes(x = num_caps, y=.resid)) +
+  geom_point()+
+  labs(x = 'Number of Capital Letters in Title', y = 'Residuals')
+
+a2 <- ggplot(data = final_model_aug, aes(x = category, y=.resid)) +
+  geom_point()+
+  labs(x = 'Category', y = 'Residuals')
+
+a3 <- ggplot(data = final_model_aug, aes(x = num_exc, y=.resid)) +
+  geom_point()+
+  labs(x = 'Number of Exclamation Points in Title', y = 'Residuals')
+
+a4 <- ggplot(data = final_model_aug, aes(x = desc_length, y=.resid)) +
+  geom_point()+
+  labs(x = 'Length of Description', y = 'Residuals')
+
+a5 <- ggplot(data = final_model_aug, aes(x = video_length, y=.resid)) +
+  geom_point()+
+  labs(x = 'Video Length', y = 'Residuals')
+
+a6 <- ggplot(data = final_model_aug, aes(x = weekday_published, y=.resid)) +
+  geom_boxplot()+
+  labs(x = 'Weekday Published', y = 'Residuals')
+
+a7 <- ggplot(data = final_model_aug, aes(x = hour_published, y=.resid)) +
+  geom_boxplot()+
+  labs(x = 'Hour Published', y = 'Residuals')
+
+a1+a2
+a3+a4
+a5+a6
+a7
+```
+Looking at the residuals versus our predictor variables, there doesn't appear to be a discernible linear relationship between our predictor variables and the residuals. But there is a fan-like shape across many of these plots. The only concerning predictor is `hour_published` as mean residuals between groups varies somewhat. But overall they seem to stay within the same range. So it doesn't look like the linearity condition has been violated.
+
+Now we will check independence. Since we have taken a random sample from the population dataset of Trending Youtube Videos from August 2020 to February of 2022, we would assume that the independence condition has been satisfied. To check, we will plot the residuals over time.
+
+```{r}
+youtube_raw <- read.csv('data/youtube_data.csv') %>%
+  subset(select = trending_date) %>%
+  mutate(trending_date = as.date(trending_date))
+
+
+final_model_aug_ind <- merge(x = final_model_aug, y = youtube_raw)
+```
+
+```{r}
+ggplot(data = final_model_aug_ind, aes(x = trending_date, y = .resid))+
+  geom_point()
+```
 
