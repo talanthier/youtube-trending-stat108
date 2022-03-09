@@ -512,20 +512,76 @@ glance(aic_model_day)
 glance(aic_model_weekday_hr)
 
 ```
-As shown above, it looks like adding back `weekday_published` and `hour_published` has increased our $R^2$ close to 0.3 shown in our model `aic_model_weekday_hr`. While our AIC has increased, $R^2$ has increased a fairly significant amount. Now we will consider adding in some interaction terms. As we noted in our EDA, 
-
+As shown above, it looks like adding back `weekday_published` and `hour_published` has increased our $R^2$ close to 0.3 shown in our model `aic_model_weekday_hr`. While our AIC has increased, $R^2$ has increased a fairly significant amount. Now we will consider adding in some interaction terms. So in our model we have `subscriberCount`,`category`,`num_caps`,`num_exc`,`desc_length`,`video_length`,`weekday_published`, and `hour_published`. As we noted in the EDA, the variables relating to the title seem to be associated. So we might want to include the interaction between `num_caps` and `num_exc` in our model. Also from the EDA, we might want to include the interaction between `subscriberCount` and `hour_published`. Additionally, we will include the interaction between `category` and `subscriberCount`.
 
 ```{r}
-full_model <- lm(log_views ~ comments_disabled + ratings_disabled + num_tags + num_caps + num_exc + num_qm + 
-                   num_period + num_dollar + title_length + desc_length + weekday_published + day_published + 
-                   hour_published + video_length + subscriberCount + videoCount + category + channel_length,
-                 data = youtube)
+model <- lm(log_views ~ subscriberCount * hour_published + category + num_caps * num_exc + desc_length + video_length + weekday_published + subscriberCount*category,
+            data = youtube_int)
+tidy(model, conf.int = TRUE) %>%
+  kable(digits = 3)
+```
+Looking at the model output, we see that the interactions between `subscriberCount` and `hour_published` mostly seem to have fairly large p-values. While there are a few with small p-values, such as `subscriberCount:hour_published1` with a p-value of 0.008, looking at the confidence interval, it is extremely close to 0. So while the p-value suggests we include the interaction in our model, since the confidence interval is so close to 0, we will not include it. Also, the interaction between `num_caps` and `num_exc` has a large p-value of 0.404 and the confidence interval captures 0. So that interaction will not be included in the final model as well. We reach the same conclusions for the interactions between `subscriberCount` and `category`. So our model will not include any interaction terms. But looking at the coefficient for `subscriberCount`, it is essentially 0. Looking at the confidence interval, it is also extremely close to 0. So while the p-value suggests that `subscriberCount` is important, we will remove it from our model.
 
-summary(full_model)
-glance(full_model)
+```{r}
+model <- lm(log_views ~ category + num_caps + num_exc + desc_length + video_length + weekday_published + hour_published, data = youtube_int)
 ```
 
 
+But one thing we have not addressed is outliers. Just looking at the EDA, we have quite a few outliers in both the response variable and many of the predictors. Since this is the case it is quite likely there are a few leverage points. 
+
+```{r}
+model_aug <- augment(model) %>%
+  mutate(obs_num = 1:n())
+```
+
+Now we will investigate the leverage for each of the observations in our dataset. We will set the threshold for leverage at
+\[\frac{2(p+1)}{n} = \frac{2(8+1)}{974} = 0.018\]
+We can plot the leverage for each observation.
+```{r}
+ggplot(data = model_aug, aes(x = obs_num, y = .hat))+
+  geom_point() +
+  geom_hline(yintercept = 0.018, color = 'red') +
+  labs(x = 'Observation Number', y = 'Leverage')
+```
+Weirdly it looks like all observations lie above our threshold for 
+
+Now we will look at the standardized residuals as well as the cooks distance.
+
+```{r}
+ggplot(data = model_aug, aes(x = .fitted, y = .std.resid))+
+  geom_point() +
+  geom_hline(yintercept = -2, color = 'red')+
+  geom_hline(yintercept = 2, color = 'red') +
+  labs(x = 'Fitted Values', y='Standard Residuals')
+
+ggplot(data = model_aug, aes(x = obs_num, y = .cooksd))+
+  geom_point() +
+  geom_hline(yintercept = 1, color = 'red')+
+  labs(x = 'Observation Number', y='Cooks Distance')
+```
+
+```{r}
+model_aug[which(abs(model_aug$.cooksd)>1),]
+
+model_aug[which(abs(model_aug$.std.resid)>2),]
+
+```
+
+It looks like we have 48 observations which lie outside our standard residual threshold. Meanwhile we have a no observations lying above the threshold for Cooks Distance. Since this is the case and these observations are perfectly valid videos, we will not remove them from the dataset.
+
+Hence we can get our final model
+
+```{r}
+final_model <- lm(log_views ~  category + num_caps + num_exc + desc_length + video_length + weekday_published + hour_published, data = youtube_int)
+
+tidy(final_model, conf.int = TRUE) %>% 
+  kable(digits = 3)
+```
+Since we took the log of view count, all of our interpretations for the coefficients need to be adjusted. We will not interprate all of the coefficients, but we will interpret a few. For `num_exc`, we have a coefficient of -0.224. Interpreting this coefficient, this means that holding all else constant, if we were to increase the number of exclamation points in the title by 1, we would expect the number of views to be multiplied by a factor of $e^{-0.224} = 0.799$. Interpreting `weekday_publishedSaturday` with a coefficient of 0.378, this means that holding all else constant, if we were to change the publish date of the same video to Saturday from Monday, we would expect the number of views to be multiplied by a factor of $e^{0.378} = 1.459$.
+
+The coefficients for the different categories of `weekday_published` are quite interesting. It seems that holding all else constant, changing the day published from Monday to any other day except Tuesday is associated with an increase in viewership. Looking at `hour_published4`, it looks like 4 and 7 am UTC lead to the largest increases in viewership from midnight UTC holding all else constant. These times correspond to 8 and 11 pm PST. Since we are looking at videos in the US, this might suggest that youtube users are most active during those times.
 
 ## Checking Assumptions
+
+Using our full model, we will check the assumptions for our model. We will start by looking at linearity
 
