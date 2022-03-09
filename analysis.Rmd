@@ -652,15 +652,18 @@ Now we will check independence. Since we have taken a random sample from the pop
 
 ```{r}
 youtube_raw <- read.csv('data/youtube_data.csv') %>%
-  subset(select = trending_date) %>%
-  mutate(trending_date = as.date(trending_date))
+  subset(select = publishedAt) %>%
+  mutate(publishedAt = as.POSIXct(publishedAt), obs_num = 1:n())
 
 
-final_model_aug_ind <- merge(x = final_model_aug, y = youtube_raw)
+final_model_aug_ind <- merge(final_model_aug, youtube_raw, by = 'obs_num')
 ```
 
 ```{r}
-ggplot(data = final_model_aug_ind, aes(x = trending_date, y = .resid))+
-  geom_point()
+ggplot(data = final_model_aug_ind, aes(x = publishedAt, y = .resid))+
+  geom_point() +
+  geom_hline(yintercept = 0, color = 'red') +
+  labs(x = 'Publish Date', y = 'Residuals')
 ```
+Seeing as the the residuals are a random scatter about 0, then it looks like our observations are independent of one another. With this in addition to knowing the methods for gaining the data, it is enough to say that the independence assumption has been satisfied.
 
