@@ -402,122 +402,74 @@ Here it looks like the day of the week might be useful in predicting `log_views`
 
 ### Multivariate
 
-Now that we have identified some predictor variables that may be useful, we will explore some of the relationships between them. We will start by looking at `subscriberCount`.
+Now that we have identified some potentially useful predictor variables that may be useful, we will explore some of the relationships between them. As we noted in the previous section of our EDA, `subscriberCount`, `category`, `weekday_published`, `hour_published` and a few other variables. We will explore the relationships between some of these variables here.
 
+We will start with subscriber count. It is possible that more popular channels tend to have videos of a certain length or tend to upload at specific times or days. It is also possible that subscriber counts vary across video categories.
 
 ```{r}
 m1 <- ggplot(data = youtube, aes(x = category, y = subscriberCount)) +
   geom_boxplot() +
   theme(axis.text.x = element_text(angle = 90))
 
-m2 <- ggplot(data = youtube, aes(x = comments_disabled, y = subscriberCount)) +
-  geom_boxplot()
-
-m3 <- ggplot(data = youtube, aes(x = ratings_disabled, y = subscriberCount)) +
-  geom_boxplot()
-
-m4 <- ggplot(data = youtube, aes(x = num_caps, y = subscriberCount)) +
-  geom_point(alpha = 0.2)
-
-m5 <- ggplot(data = youtube, aes(x = num_exc, y = subscriberCount)) +
-  geom_boxplot()
-  
-m6 <- ggplot(data = youtube, aes(x = num_period, y = subscriberCount)) +
-  geom_boxplot()
-
-m7 <- ggplot(data = youtube, aes(x = num_dollar, y = subscriberCount)) +
-  geom_boxplot()
-
-m8 <- ggplot(data = youtube, aes(x = desc_length, y = subscriberCount)) +
-  geom_point(alpha = 0.2)
-
-m9 <- ggplot(data = youtube, aes(x = hour_published, y = subscriberCount)) +
-  geom_boxplot()
-
-m10 <- ggplot(data = youtube, aes(x = day_published, y = subscriberCount)) +
-  geom_boxplot()
-
-m1 + m2
-m3 + m4
-m5 + m6
-m7 +m8
-m9 + m10
-```
-
-Looking at the above plots, it looks like `category`, `ratings_disabled`, `num_dollar`, `hour_published`, and `day_published` stand out as potentially associated with `subscriberCount` shown by the difference in mean subscriber counts across the groups in each of those predictor variables. For example, the mean subscriber count for videos with ratings disabled is quite a bit higher than the mean subscriber count for the videos with ratings enabled.
-
-```{r}
-m11 <- ggplot(data = youtube, aes(fill = comments_disabled, x = category)) +
-  geom_bar(position = 'fill') +
-  theme(axis.text.x = element_text(angle = 90))
-
-m12 <- ggplot(data = youtube, aes(fill = ratings_disabled, x = category)) +
-  geom_bar(position = 'fill') +
-  theme(axis.text.x = element_text(angle = 90))
-
-m13 <- ggplot(data = youtube, aes(x = num_caps, y = category)) +
+m2 <- ggplot(data = youtube, aes(x = weekday_published, y = subscriberCount)) +
   geom_boxplot() +
   theme(axis.text.x = element_text(angle = 90))
 
-m14 <- ggplot(data = youtube, aes(fill = num_exc, x = category)) +
-  geom_bar(position = 'fill') +
-  theme(axis.text.x = element_text(angle = 90))
-
-m15 <- ggplot(data = youtube, aes(fill = num_period, x = category)) +
-  geom_bar(position = 'fill') +
-  theme(axis.text.x = element_text(angle = 90))
-
-m16 <- ggplot(data = youtube, aes(x = desc_length, y = category)) +
+m3 <- ggplot(data = youtube, aes(x = hour_published, y = subscriberCount)) +
   geom_boxplot()
 
-m17 <- ggplot(data = youtube, aes(fill = hour_published, x = category)) +
-  geom_bar(position = 'fill') +
-  theme(axis.text.x = element_text(angle = 90))
+m4 <- ggplot(data = youtube, aes(x = video_length, y = subscriberCount)) +
+  geom_point(alpha = 0.2)
 
-m18 <- ggplot(data = youtube, aes(fill = day_published, x = category)) +
-  geom_bar(position = 'fill') +
-  theme(axis.text.x = element_text(angle = 90))
-
-m11+m12
-m13+m14
-m15+m16
-m17+m18
+m1+m2
+m3+m4
 ```
 
-Looking at these plots, it looks like the the video category is related to many of the other variables we're interested. The one that doesn't stand out is `ratings_disabled` as the proportion of those with ratings disabled is pretty consistent across categories. Meanwhile for things like the `num_caps` and `desc_length` we see on average a higher number of capital letters and longer length descriptions in Action/Adventure videos.
+Looking at the above plots, it looks like the `hour_published` and `weekday_published` are potential covariates. Meanwhile `video_length` doesn't appear to be associated with `subscriberCount`. This isn't super surprising as the in the correlation matrix, we found the correlation between `subscriberCount` and `video_length` to be quite small.
 
-LIST: subscriberCount, category, comments_disabled, ratings_disabled, num_caps, num_exc, num_period, num_dollar, desc_length, hour_published, day_published
+Now we will look at `video_length`. A few possible relationships may be with respect to `desc_length` and `title_length`. Potentially longer videos might have more characters in the description or title since there might be more content to summarize in these videos.
 
 ```{r}
-m19 <- ggplot(data = youtube, aes(fill = ratings_disabled, y = comments_disabled)) +
-  geom_bar(position = 'fill')
+m5 <- ggplot(data = youtube, aes(x = desc_length, y = video_length)) +
+  geom_point() + xlim(0,2000) + ylim(0, 3000)# note: limits adjusted to zoom in
 
-m20 <- ggplot(data = youtube, aes(x = num_caps, y = comments_disabled)) +
-  geom_boxplot()
+m6 <- ggplot(data = youtube, aes(x = title_length, y = video_length)) +
+  geom_point() + ylim(0,2000)
 
-m21 <- ggplot(data = youtube, aes(fill = num_exc, y = comments_disabled)) +
-  geom_bar(position = 'fill')
-
-m22 <- ggplot(data = youtube, aes(fill = num_period, y = comments_disabled)) +
-  geom_bar(position = 'fill')
-
-m23 <- ggplot(data = youtube, aes(fill = num_dollar, y = comments_disabled)) +
-  geom_bar(position = 'fill')
-
-m24 <- ggplot(data = youtube, aes(x = desc_length, y = comments_disabled)) +
-  geom_boxplot()
-
-m19+m20
-m21+m22
-m23+m24
+m5+m6
 ```
+There doesn't seem to be much of a relationship in these cases. If anything there might be a very weak positive relationship between `title_length` and `video_length`.
 
+One thing we would expect is that there is a relationship between many of the variables related to title. We would expect variables like `title_length`, `num_exc`, `num_qm` and so on to be related.
+
+```{r}
+m7 <- ggplot(data = youtube, aes(fill = num_exc, y = num_qm))+
+  geom_bar(position = 'fill')
+
+m8 <- ggplot(data = youtube, aes(x = title_length, y = num_exc))+
+  geom_boxplot()
+
+m9 <- ggplot(data = youtube, aes(x = title_length, y = num_qm))+
+  geom_boxplot()
+
+m10 <- ggplot(data = youtube, aes(x = title_length, y = num_period))+
+  geom_boxplot()
+
+m11 <- ggplot(data = youtube, aes(x = title_length, y = num_caps))+
+  geom_point()
+
+m7 +m8
+m8+m9+m10+m11
+```
+As we can see, many of these variables having to do with the title are associated. `title_length` and `num_caps` seem most obvious with a fairly clear positive linear association.
+
+Once we decide on what variables to use in our model, we can further investigate whether any other predictors are associated with one another.
 
 ## Modeling
 
-As discussed earlier, the distribution for `view_count` is heavily skewed. Since the purpose of our analysis is to conduct inference on our model, we would like our response variable to be approximately normally distributed. Hence we will be using `log_views` instead of `view_count` for our predictions. As for the predictor variables, we only want to include predictor variables that the uploader might have knowledge of before uploading. So we will not be using variables such as `likes`, `dislikes`, and `trending_age` since the uploader will not know the values of these variables until the video is uploaded. This narrows down the variables we can use considerably. From our EDA, we noticed the following variables might be useful for predicting the log view count:
+As discussed earlier, the distribution for `view_count` is heavily skewed. Since the purpose of our analysis is to conduct inference on our model, we would like our response variable to be approximately normally distributed. Hence we will be using `log_views` instead of `view_count` for our predictions. As for the predictor variables, we only want to include predictor variables that the uploader might have knowledge of before uploading. So we will not be using variables such as `likes`, `dislikes`, and `trending_age` since the uploader will not know the values of these variables until the video is uploaded. This narrows down the variables we can use considerably. Following from the EDA we will build a model using the following predictor variables:
 
-`subscriberCount`, `category`, `comments_disabled`, `ratings_disabled`, `num_caps`, `num_exc`, `num_period`, `num_dollar`, `desc_length`, `hour_published`, `weekday_published`
+`subscriberCount`, `category`, `comments_disabled`, `ratings_disabled`, `num_caps`, `num_exc`, `num_period`, `num_dollar`, `desc_length`, `hour_published`, `weekday_published`, `video_length`
 
 We can quickly build a model to predict `log_views` with these predictor variables with no interaction terms. But as we noted in the Exploratory data analysis, there seems to be a weak linear relationship between `num_exc`, `num_period`, `num_dollar` and `log_views`. So we will consider 2 separate models: one with those variables as factors, the other with those variables as integers. For the model with those variables treated as integers, we will use the data `youtube_int`.
 
@@ -531,26 +483,36 @@ youtube_int <- youtube %>%
 Now we will create 2 models both using all of the variables we mentioned above. In `full_model_factor`, we will treat `num_exc`, `num_period`, and `num_dollar` as factors. In `full_model_int` they will be treated as integers.
 
 ```{r}
-full_model_factor <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + weekday_published + day_published, data = youtube)
+full_model_factor <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + weekday_published + day_published + video_length, data = youtube)
 
-full_model_int <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + weekday_published + day_published, data = youtube_int)
+full_model_int <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + weekday_published + day_published + video_length, data = youtube_int)
 
 glance(full_model_factor)
 glance(full_model_int)
 ```
 
-Looking at the AIC and BIC of our 2 models, it looks like our model with `full_model_int` is considered better. This isn't super surprising as they have fairly close values of $R^2$ but `full_model_factor` has 91 degrees of freedom compared to `full_model_int` with only 80. Seeing as AIC and BIC penalizes more complex models, this is expected. Since the difference in $R^2$ is still fairly small, we will be building off of `full_model_int`.
+Looking at the AIC and BIC of our 2 models, it looks like our model with `full_model_int` is considered better. This isn't super surprising as they have fairly close values of $R^2$ but `full_model_factor` has 92 degrees of freedom compared to `full_model_int` with only 81. Seeing as AIC and BIC penalizes more complex models, this is expected. Since the difference in $R^2$ is still fairly small, we will be building off of `full_model_int` Now we will try running backwards selection on our model using AIC.
 
 ```{r}
-youtube <- youtube_int
+model_back_selection <- step(full_model_int, direction = 'backward')
+glance(model_back_selection)
 ```
-
-Consider the model output of `full_model_int`.
+Thus, according to the backwards selection our best model has the predictors `subscriberCount`, `num_exc`, `video_length`, `desc_length`, `num_caps`, `category`. But while we have a small AIC, our $R^2$ has dropped significantly from its level of about $0.32$. So we are going to consider adding back some of our variables which had quite a bit of predictive power.
 
 ```{r}
-tidy(full_model_int, conf.int = TRUE) %>%
-  kable(digits = 3, format = 'markdown')
+aic_model_weekday <- lm(log_views ~ subscriberCount + category + num_caps + num_exc + desc_length + video_length+ weekday_published, data = youtube_int)
+aic_model_hr <- lm(log_views ~ subscriberCount + category + num_caps + num_exc + desc_length + video_length + hour_published, data = youtube_int)
+aic_model_day <- lm(log_views ~ subscriberCount + category + num_caps + num_exc + desc_length + video_length + day_published, data = youtube_int)
+aic_model_weekday_hr <- lm(log_views ~ subscriberCount + category + num_caps + num_exc + desc_length + video_length + weekday_published + hour_published, data = youtube_int)
+
+
+glance(aic_model_weekday)
+glance(aic_model_hr)
+glance(aic_model_day)
+glance(aic_model_weekday_hr)
+
 ```
+As shown above, it looks like adding back `weekday_published` and `hour_published` has increased our $R^2$ close to 0.3 shown in our model `aic_model_weekday_hr`. While our AIC has increased, $R^2$ has increased a fairly significant amount. Now we will consider adding in some interaction terms. As we noted in our EDA, 
 
 
 ```{r}
