@@ -13,6 +13,8 @@ library(patchwork)
 library(broom)
 library(leaps)
 library(Hmisc)
+library(corrplot)
+library(RColorBrewer)
 ```
 
 ## Introduction
@@ -99,17 +101,16 @@ ggplot(data = youtube, aes(x = category, y = log_views)) +
   labs(x = 'Video Category', y = 'Log Views', title = 'Video Category vs Log View Count')
 ```
 
-Now looking at the 
+While we will not include all of the plots from our exploratory data analysis, we identified quite a few variables that we thought may be useful for our final model. In addition to those mentioned above, these included the variables `subscriberCount`, `comments_disabled`, `ratings_disabled`, `num_caps`, `num_exc`, `num_period`, `num_dollar`, `desc_length`, `hour_published`, `weekday_published`, `video_length`.
 
-```{r echo=FALSE}
-youtube <- youtube %>%
-  mutate(hour_published = as.factor(hour_published))
-ggplot(data = youtube, aes(x = weekday_published, y =log_views)) +
-  geom_boxplot() +
-  labs(x = 'Weekday Published', y = 'Log Views', title = 'Weekday Published vs Log View Count')
+```{r echo = FALSE}
+library(corrplot)
+library(RColorBrewer)
+youtube_num <- youtube %>%
+  subset(select = -c(publishedAt, view_count, comments_disabled, ratings_disabled, desc_length, weekday_published, category))
+M <-cor(youtube_num)
+corrplot(M, type="upper", method="color")
 ```
-
-
 
 ## Regression Analysis
 
