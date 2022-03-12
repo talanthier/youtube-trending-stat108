@@ -1,15 +1,73 @@
 ---
-title: ""
+title: "Final Project"
 author: "Tim Lanthier"
 date: "3/12/2022"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(knitr)
+library(patchwork)
+library(broom)
+library(leaps)
+library(Hmisc)
 ```
 
 ## Introduction
+
+```{r echo = FALSE}
+youtube_raw <- read.csv('data/youtube_data.csv') %>%
+  subset(select = -c(X)) %>%
+  mutate(trending_date = as.Date(trending_date),  # strip time since all trending dates recorded at time 0
+         publishedAt = as.POSIXct(publishedAt),
+         weekday_published = as.factor(weekday_published))
+
+youtube_raw$desc_length[is.na(youtube_raw$desc_length)] <- 0
+youtube_raw <- youtube_raw %>%
+  drop_na()
+
+levels(youtube_raw$weekday_published) = c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday')
+
+
+youtube <- youtube_raw %>%
+  subset(select = -c(video_id, channelId, categoryId, tags, description, title, trending_date, likes, dislikes, comment_count, trending_age, channelTitle))
+```
+
+  For content creators on Youtube, their income is largely determined by the popularity of their videos. The most obvious source of income for creators is revenue from ads. The more views your video gets, the more ads are served and the more a creator might get paid. Additionally, higher view counts on videos may result in sponsorship deals for creators which serve an additional source of income. Hence, it is important for creators on Youtube to maximize the number of views that they get on videos. Of course the success of a Youtube video depends on the content in the video itself, but how much is the view count of a video associated with other aspects such as the title or time of upload?
+  
+In this paper, we will explore how certain characteristics of trending Youtube videos are associated with view count. We wish to find what aspects of a video such as length of the title or time of upload may be associated with the view count a Youtube video.
+
+The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtube-trending-video-dataset?select=US_youtube_trending_data.csv) and includes as observations all trending videos from August of 2020 to now from a variety of regions. For this analysis, we will only be using trending videos from the US. Note that the dataset we will be using was accessed from Kaggle on February 7, 2022, so we will only include trending Youtube videos up to that date. From this dataset, we have taken a random sample of 1000 videos and have generated some additional variables from the dataset. We also used the Youtube API with the provided video and channel IDs to gain additional potential predictors such as video length and subscriber counts for the channels. Our feature generation procedure left us with a few different missing values. There were some missing subscriber counts as well as video lengths due to videos and channels no longer existing. Since there were very few of those observations, we have removed them from our dataset. Additionaly, some videos had no description leading to missing values. So for those videos we imputed the description length of be 0 characters. 
+
+We also removed variables such as `likes`, `dislikes`, and `trending_age` since those values would not be observed until after the video is uploaded. Since we want to look at variables which can only be observed before the video is uploaded, those will not be important for our analysis. This leaves us with a dataset with 973 observations and the following 20 variables:
+
+|Variable|Description|
+|---|---|
+|publishedAt | date and time of upload (PST)|
+|view_count| number of views|
+|comments_disabled| comments are disabled (T/F)|
+|ratings_disabled| ratings are disabled (T/F)|
+|num_tags| number of tags in video|
+|num_caps| number of capital letters in title|
+|num_exc| number of exclamation points in title|
+|num_qm| number of question marks in title|
+|num_period| number of periods in title|
+|num_dollar| number of dollar signs in title|
+|title_length| length of title in characters|
+|desc_length| length of description in characters|
+|channel_length| length of channel name in characters|
+|weekday_published| weekday of video upload|
+|day_published| day of month video was uploaded|
+|hour_published| hour of day video was published|
+|video_length| length of video in seconds|
+|subscriberCount| number of subscribers on publisher's channel|
+|videoCount| number of videos on publisher's channel|
+|category| video category|
+   
+
+
 
 ## Regression Analysis
 
