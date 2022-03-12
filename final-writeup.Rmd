@@ -66,6 +66,48 @@ We also removed variables such as `likes`, `dislikes`, and `trending_age` since 
 |videoCount| number of videos on publisher's channel|
 |category| video category|
    
+Looking at the response variable of view count, we find that the distribution for view count has a heavy positive skew. Since we wish to conduct inference on our model, we will instead be using the logarithm of view count so as to have a more normally distributed response variable. The distributions for both variables are shown below.
+
+```{r echo = FALSE}
+youtube <- youtube %>% 
+  mutate(log_views = log(view_count))
+
+p1<- ggplot(data = youtube, aes(view_count)) +
+  geom_histogram(bins = 50)+
+  labs(x = 'View Count', title = 'Distribution of View Count')
+
+p2<- ggplot(data = youtube, aes(log_views)) +
+  geom_histogram(bins = 50)+
+  labs(x = 'Log View Count', title = 'Distribution of Log View Count')
+
+p1+p2
+```
+
+Interestingly, looking at the plots for log view count against the number of tags, we see what appears to be a completely random scatter. So there appears to be no relationship between log view count and the number of tags a video has. This is quite surprising as I would expect a large number of tags might result in the video getting suggested to more users and thus more people viewing the video.
+```{r echo = FALSE}
+ggplot(data = youtube, aes(x = num_tags, y = log_views)) +
+  geom_point() +
+  labs(x = 'Number of Tags', y = 'Log Views', title = 'Number of Tags vs Log View Count')
+```
+
+Meanwhile looking at the box plots for log view count across the categories of videos, we find that there are some large differences in log view count across the different video categories. While the variability varies between the categories, just looking at the means, we have comedy and SciFi/Fantasy videos appears to be the most popular while foreign, horror, and music videos appear to have the lowest mean log view counts. So video category may be useful in our model. What seemed unusual is that videos in the Music category have such a low mean log view count. Just based off my own observations of trending videos, it seems that music videos which hit trending tend to have pretty high view counts.
+
+```{r echo=FALSE}
+ggplot(data = youtube, aes(x = category, y = log_views)) +
+  geom_boxplot()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
+  labs(x = 'Video Category', y = 'Log Views', title = 'Video Category vs Log View Count')
+```
+
+Now looking at the 
+
+```{r echo=FALSE}
+youtube <- youtube %>%
+  mutate(hour_published = as.factor(hour_published))
+ggplot(data = youtube, aes(x = weekday_published, y =log_views)) +
+  geom_boxplot() +
+  labs(x = 'Weekday Published', y = 'Log Views', title = 'Weekday Published vs Log View Count')
+```
 
 
 
