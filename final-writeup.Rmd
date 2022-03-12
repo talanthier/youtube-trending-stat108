@@ -1,0 +1,23 @@
+---
+title: ""
+author: "Tim Lanthier"
+date: "3/12/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+## Regression Analysis
+
+## Discussion
+
+## Limitations
+
+## Conclusion
+
+## Additional Work
+
