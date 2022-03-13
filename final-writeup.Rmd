@@ -277,7 +277,7 @@ glance(final_model_no_sub)
 
 Even though `subscriberCount` has a very large p-value, we found excluding it and its interactions from the models resulted in a considerable drop in $R^2$ of over 0.2. We also investigated whether there were any influential points in our dataset. While we found there were quite a few observations which lied outside our threshold for leverage and standardized residuals, looking at the cook's distance, we found that removing these observations would have little effect on our model. The plots for leverage, standardized residuals, and cook's distance are shown below.
 
-```{r}
+```{r echo = FALSE}
 thresh = (2*(length(final_model$coefficients)+1))/973
 
 l1 <- ggplot(data = final_model_aug, aes(x = obs_num, y = .hat))+
@@ -299,9 +299,89 @@ l3 <- ggplot(data = final_model_aug, aes(x = obs_num, y = .cooksd))+
 l1 + l2 + l3
 ```
 
-Seeing as our model is a multiple linear regression model, we have quite a few assumptions which needed to be checked. 
+Seeing as our model is a multiple linear regression model, we have quite a few assumptions which needed to be checked if we wish to conduct inference on the coefficients. The first assumption is that `log_views` is normally distributed. As we noted before, the distribution for `log_views` seems to be approximately normal. We also have the following distribution and QQ plot of the residuals.
+
+```{r echo = FALSE}
+ggplot(data = final_model_aug, aes(x =.resid)) +
+  geom_histogram(bins = 50)+
+  labs(x = 'Residuals', title = 'Distribution of Residuals')
+
+  
+qqnorm(final_model_aug$.resid)
+qqline(final_model_aug$.resid, col = "steelblue", lwd = 2)
+```
+As we see the residuals seem to be normally distributed, although we have a longer right tail. This is reflected in our QQ plot as the residuals don't appear to follow the normal distribution for the larger residuals. So the normality assumption is partially satisfied.
+
+The next assumption we need to check is that the regression variance is constant. We can check this by looking at our predictions versus the residuals shown in the plot below. As we can see, for middling predicted log view count, we have a lot of variability in the residuals. Meanwhile for very large or small predicted log views, we have considerably less variability in the residuals. Hence the constant variance assumption has been violated.
+
+```{r}
+ggplot(data = final_model_aug, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, color = 'red') +
+  labs(x = 'Fitted Values', y = 'Residuals', title = 'Predicted Log View Count vs Residuals')
+```
+
+We also must check that `log_views` has a linear relationship with the predictor variables used in our model. Looking at the above plot, there isn't a clear pattern in our plot so it looks like a linear relationship may be appropriate. We also found that looks at the plots of the residuals against each of the predictors, there was no discernable pattern. The only exception was for `num_exc` where the average residuals seemed to be higher for videos with more exclamation points in the title. That being said, it seems that the linearity assumption was satisfied.
+
+```{r eval = FALSE}
+l1 <- ggplot(data = final_model_aug, aes(x = time_of_day, y=.resid)) +
+  geom_boxplot()+
+  labs(x = 'Time of Day', y = 'Residuals')
+
+l2 <- ggplot(data = final_model_aug, aes(x = category, y=.resid)) +
+  geom_point()+
+  labs(x = 'Category', y = 'Residuals')
+
+l3 <- ggplot(data = final_model_aug, aes(x = subscriberCount, y=.resid)) +
+  geom_point()+
+  labs(x = 'Number of Subscribers', y = 'Residuals')+
+  geom_smooth(method = 'lm')
+
+l4 <- ggplot(data = final_model_aug, aes(x = num_caps, y=.resid)) +
+  geom_point()+
+  labs(x = 'Number of Capital Letters in Title', y = 'Residuals') +
+  geom_smooth(method = 'lm')
+
+l5 <- ggplot(data = final_model_aug, aes(x = as.factor(num_exc), y=.resid)) +
+  geom_boxplot()+
+  labs(x = 'Number of Exclamation Points in Title', y = 'Residuals')
+
+l6 <- ggplot(data = final_model_aug, aes(x = desc_length, y=.resid)) +
+  geom_point()+
+  labs(x = 'Length of Description (characters)', y = 'Residuals')+
+  geom_smooth(method = 'lm')
+
+l7 <- ggplot(data = final_model_aug, aes(x = video_length, y=.resid)) +
+  geom_point()+
+  labs(x = 'Length of video (seconds)', y = 'Residuals') +
+  geom_smooth(method = 'lm')
+
+l1+l2
+l3+l4
+l5+l6
+l7
+```
+The final assumption is the independence assumption. Plotting the residuals against the time the videos were trending (and subsequently added to the dataset), we find that the residuals are randomly scattered around 0. So the independence assumption has been satisfied. Additionally, 
+
+```{r echo = FALSE}
+pub_dates <- youtube_raw %>% 
+  subset(select = trending_date) %>% 
+  mutate(obs_num = 1:n())
+
+final_model_aug_pub_dates <- inner_join(final_model_aug, pub_dates, by = 'obs_num')
+
+ggplot(data = final_model_aug_pub_dates, aes(x = trending_date, y = .resid))+
+  geom_point() +
+  geom_hline(yintercept = 0, color = 'red') +
+  labs(x = 'Trending Date', y = 'Residuals', title = 'Residuals vs Date Trending')
+```
+
+Since the constant variance assumption has been violated and the normality assumption is only partially satisfied, it would be inappropriate to conduct inference on the coefficients of our model. 
+
 
 ## Discussion
+
+As mentioned in the previous section, since the assumptions of our model (linearity, constant variance, independence, and normality) have not all been satisfied, it would be inappropriate to conduct inference and interpret the coefficients of our model.
 
 ## Limitations
 
