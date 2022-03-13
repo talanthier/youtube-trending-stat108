@@ -302,13 +302,16 @@ l1 + l2 + l3
 Seeing as our model is a multiple linear regression model, we have quite a few assumptions which needed to be checked if we wish to conduct inference on the coefficients. The first assumption is that `log_views` is normally distributed. As we noted before, the distribution for `log_views` seems to be approximately normal. We also have the following distribution and QQ plot of the residuals.
 
 ```{r echo = FALSE}
-ggplot(data = final_model_aug, aes(x =.resid)) +
+n1 <- ggplot(data = final_model_aug, aes(x =.resid)) +
   geom_histogram(bins = 50)+
   labs(x = 'Residuals', title = 'Distribution of Residuals')
 
+n2 <-ggplot(data = final_model_aug, aes(sample = .resid)) +
+  stat_qq() +
+  stat_qq_line(color = 'red') +
+  labs(x = 'Theoretical Quantiles', y = 'Sample Quantiles', title = 'Normal QQ Plot')
   
-qqnorm(final_model_aug$.resid)
-qqline(final_model_aug$.resid, col = "steelblue", lwd = 2)
+n1+n2
 ```
 As we see the residuals seem to be normally distributed, although we have a longer right tail. This is reflected in our QQ plot as the residuals don't appear to follow the normal distribution for the larger residuals. So the normality assumption is partially satisfied.
 
@@ -381,8 +384,8 @@ Since the constant variance assumption has been violated and the normality assum
 
 ## Discussion
 
-As mentioned in the previous section, since the assumptions of our model (linearity, constant variance, independence, and normality) have not all been satisfied, it would be inappropriate to conduct inference and interpret the coefficients of our model.
-
+As mentioned in the previous section, since the assumptions of our model (linearity, constant variance, independence, and normality) have not all been satisfied, we should be cautious when interpreting the coefficients of our model.
+ 
 ## Limitations
 
 ## Conclusion
