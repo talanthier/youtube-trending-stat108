@@ -167,7 +167,8 @@ We tested 3 different models: one with `hour_published` treated as numeric, one 
 
 ```{r echo = FALSE, results = 'hide', message = FALSE}
 model_back_selection <- step(model_hour_cat_4, direction = 'backward')
-glance(model_back_selection)
+tidy(model_back_selection, conf.int = TRUE) %>%
+  kable(format = 'markdown')
 ```
 
 ```{r echo =FALSE, results = 'hide'}
@@ -253,13 +254,19 @@ Our final model is shown below.
 final_model <- lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
     num_exc + desc_length + video_length + category*subscriberCount + category*desc_length, data = youtube)
 
-final_model_aug <- augment(final_model)
+final_model_aug <- augment(final_model) %>%
+  mutate(obs_num = 1:n())
 
 tidy(final_model, conf.int = TRUE) %>%
   kable(digits = 4, format = 'markdown')
+
+final_model_no_sub <- lm(log_views ~ time_of_day +category + num_caps + 
+    num_exc + desc_length + video_length + category*desc_length, data = youtube)
 ```
+
 ```{r eval=FALSE}
 glance(final_model)
+glance(final_model_no_sub)
 ```
 
 
@@ -268,7 +275,31 @@ glance(final_model)
 |---|---|---|---|
 |0.3396|2777.482|3016.621|
 
-Seeing as our model is a multiple linear regression model, we have quite a few assumptions which needed to be checked.
+Even though `subscriberCount` has a very large p-value, we found excluding it and its interactions from the models resulted in a considerable drop in $R^2$ of over 0.2. We also investigated whether there were any influential points in our dataset. While we found there were quite a few observations which lied outside our threshold for leverage and standardized residuals, looking at the cook's distance, we found that removing these observations would have little effect on our model. The plots for leverage, standardized residuals, and cook's distance are shown below.
+
+```{r}
+thresh = (2*(length(final_model$coefficients)+1))/973
+
+l1 <- ggplot(data = final_model_aug, aes(x = obs_num, y = .hat))+
+  geom_point() +
+  geom_hline(yintercept = thresh, color = 'red') +
+  labs(x = 'Observation Number', y = 'Leverage')
+
+l2 <- ggplot(data = final_model_aug, aes(x = .fitted, y = .std.resid))+
+  geom_point() +
+  geom_hline(yintercept = -2, color = 'red')+
+  geom_hline(yintercept = 2, color = 'red') +
+  labs(x = 'Fitted Values', y='Standard Residuals')
+
+l3 <- ggplot(data = final_model_aug, aes(x = obs_num, y = .cooksd))+
+  geom_point() +
+  geom_hline(yintercept = 1, color = 'red')+
+  labs(x = 'Observation Number', y='Cooks Distance')
+
+l1 + l2 + l3
+```
+
+Seeing as our model is a multiple linear regression model, we have quite a few assumptions which needed to be checked. 
 
 ## Discussion
 
