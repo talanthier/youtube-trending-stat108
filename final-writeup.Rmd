@@ -107,12 +107,38 @@ While we will not include all of the plots from our exploratory data analysis, w
 library(corrplot)
 library(RColorBrewer)
 youtube_num <- youtube %>%
-  subset(select = -c(publishedAt, view_count, comments_disabled, ratings_disabled, desc_length, weekday_published, category))
+  subset(select = -c(publishedAt, view_count, comments_disabled, ratings_disabled, weekday_published, category))
 M <-cor(youtube_num)
 corrplot(M, type="upper", method="color")
 ```
+Looking at the correlation plots, we can see that `subscriberCount` has a moderate correlation with log views. We also find that `num_caps` and `num_exc` have a weak correlation with log views. Additionally we see that the hour published has a very weak correlation. But from our exploratory data analysis, we found that there was quite a bit of variability of log view count for the different hours published so we will investigate its use further.
+
 
 ## Regression Analysis
+
+For constructing our final model, we started by creating a model using all of the variables we identified as potentially important:
+
+`subscriberCount`, `category`, `comments_disabled`, `ratings_disabled`, `num_caps`, `num_exc`, `num_period`, `num_dollar`, `desc_length`, `hour_published`, `weekday_published`, `video_length`
+
+```{r echo = FALSE, results = 'hide'}
+full_model_factor <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + as.factor(num_exc) + as.factor(num_period) + as.factor(num_dollar) + desc_length + hour_published + weekday_published + day_published + video_length, data = youtube)
+
+full_model_int <- lm(log_views ~ subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + num_dollar + desc_length + hour_published + weekday_published + day_published + video_length, data = youtube)
+
+tidy(full_model_factor)
+tidy(full_model_int)
+
+glance(full_model_factor)
+glance(full_model_int)
+
+tidy(full_model_int, conf.int=TRUE) %>%
+  kable(digits = 3)
+```
+
+We built 2 models using these variables. One model had `num_exc`, `num_period`, and `num_dollar` treated as categorical since there were so few values and the other model treated them as integer values. Our categorical model had an $R^2$ of 0.285 and AIC of 2842.164. Our integer model had an $R^2$ of 0.273 and AIC of 2836.423. Since the $R^2$ values between the 2 models are quite close, we decided to choose the model with the above variables treated as integers due to having a lower AIC.
+
+Next, we checked whether or not to treat `hour_published` as numeric. As we noticed the correlation table, the correlation between the hour published and log view count is extremely weak. But we found in our data analysis that the log view count across different hours varied quite a bit, just not in a linear fashion with respect to hour.
+
 
 ## Discussion
 
