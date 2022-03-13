@@ -1,8 +1,9 @@
 ---
 title: "Final Project"
-author: "Tim Lanthier"
+author: "Timothy Lanthier"
 date: "3/12/2022"
 output: pdf_document
+urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
@@ -116,7 +117,7 @@ Looking at the correlation plots, we can see that `subscriberCount` has a modera
 
 ## Regression Analysis
 
-For constructing our final model, we started by creating a model using all of the variables we identified as potentially important:
+As mentioned earlier, rather than using view count as our response variable, we have decided to use log view count since we intend on conducting inference on our model. For constructing our final model, we started by creating a model using all of the variables we identified as potentially important:
 
 `subscriberCount`, `category`, `comments_disabled`, `ratings_disabled`, `num_caps`, `num_exc`, `num_period`, `num_dollar`, `desc_length`, `hour_published`, `weekday_published`, `video_length`
 
@@ -138,6 +139,129 @@ tidy(full_model_int, conf.int=TRUE) %>%
 We built 2 models using these variables. One model had `num_exc`, `num_period`, and `num_dollar` treated as categorical since there were so few values and the other model treated them as integer values. Our categorical model had an $R^2$ of 0.285 and AIC of 2842.164. Our integer model had an $R^2$ of 0.273 and AIC of 2836.423. Since the $R^2$ values between the 2 models are quite close, we decided to choose the model with the above variables treated as integers due to having a lower AIC.
 
 Next, we checked whether or not to treat `hour_published` as numeric. As we noticed the correlation table, the correlation between the hour published and log view count is extremely weak. But we found in our data analysis that the log view count across different hours varied quite a bit, just not in a linear fashion with respect to hour.
+
+```{r echo =FALSE, results = 'hide'}
+youtube <- youtube %>%
+  mutate(time_of_day = cut(hour_published, right = FALSE, breaks = c(0,6,12,18,24), labels = c('12am_to_5am', '6am_to_11am', '12pm_to_5pm', '6pm_to_11pm')))
+model_hour_int <- lm(log_views ~ hour_published + subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + 
+                       num_dollar + desc_length + weekday_published + day_published + video_length, data = youtube)
+model_hour_cat_4 <- lm(log_views ~ time_of_day + subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc + num_period + 
+                       num_dollar + desc_length + weekday_published + day_published + video_length, data = youtube)
+model_hour_cat <- lm(log_views ~ as.factor(hour_published) + subscriberCount + category + comments_disabled + ratings_disabled + num_caps + num_exc+
+                         num_period + num_dollar + desc_length + weekday_published + day_published + video_length, data = youtube)
+tidy(model_hour_int, conf.int = TRUE) %>%
+  kable(digits = 3)
+tidy(model_hour_cat_4, conf.int = TRUE) %>%
+  kable(digits = 3)
+tidy(model_hour_cat, conf.int = TRUE) %>%
+  kable(digits = 3)
+
+glance(model_hour_int)
+glance(model_hour_cat_4)
+glance(model_hour_cat)
+
+
+```
+
+We tested 3 different models: one with `hour_published` treated as numeric, one with `hour_published` treated as categorical with 24 categories, and one with `hour_published` treated as categorical with 4 categories, each one being a 6 hour interval. We found that our numeric model and model with 4 categories to have similar values for $R^2$ of around 0.274 while our model with 24 categories for `hour_published`, we got an $R^2$ of 0.294. However, the AIC and BIC of our last model was significantly greater than that of our other 2 models. So we decided to choose the model with the best AIC being the model with 4 categories for hour published. We called this variable with 4 categories `time_of_day`.
+
+```{r echo = FALSE, results = 'hide', message = FALSE}
+model_back_selection <- step(model_hour_cat_4, direction = 'backward')
+glance(model_back_selection)
+```
+
+```{r echo =FALSE, results = 'hide'}
+glance(lm(log_views ~ time_of_day + subscriberCount + category + num_caps + 
+    num_exc + desc_length + video_length, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount + category + num_caps + 
+    num_exc + desc_length + video_length + ratings_disabled, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount + category + num_caps + 
+    num_exc + desc_length + video_length + day_published, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount + category + num_caps + 
+    num_exc + desc_length + video_length + num_dollar, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount + category + num_caps + 
+    num_exc + desc_length + video_length + comments_disabled, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount + category + num_caps + 
+    num_exc + desc_length + video_length + num_period, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount + category + num_caps + 
+    num_exc + desc_length + video_length + weekday_published, data = youtube))
+
+model <- lm(log_views ~ time_of_day+ subscriberCount + category + num_caps + 
+    num_exc + desc_length + video_length, data = youtube)
+```
+
+Next we ran backwards selection on this model using AIC. This gave us a model with `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, and `video_length` as the best model. Just to make sure we didn't miss any important variables, we added back in some of the variables to check whether there would be an improvement, but none of the variables led to any significant increase in $R^2$. Next, we checked some potential interactions between our predictor variables. We found that interactions between `time_of_day` and `category`, `category` and `subscriberCount`, and `category` and `desc_length` to yield significant increases in $R^2$ for our model. We then checked all possible models with these different interaction terms and chose the model with the lowest AIC.
+
+```{r echo = FALSE, results = 'hide'}
+glance(model)
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + time_of_day*category, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*subscriberCount, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*num_caps, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*desc_length, data = youtube))
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*video_length, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + subscriberCount*desc_length, data = youtube))
+
+```
+
+```{r eval = FALSE}
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*time_of_day + category*subscriberCount + category*desc_length, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*time_of_day + category*subscriberCount, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*time_of_day + category*desc_length, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*subscriberCount + category*desc_length, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*time_of_day, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*subscriberCount, data = youtube))
+
+glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*desc_length, data = youtube))
+```
+
+This gave us the final model which includes the predictor variables `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, `video_length` and the iteractions between `category` and both `desc_length` and `subscriberCount`. Our final model is shown below.
+\newpage
+
+```{r echo = FALSE}
+final_model <- lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*subscriberCount + category*desc_length, data = youtube)
+
+tidy(final_model, conf.int = TRUE) %>%
+  kable(digits = 4, format = 'markdown')
+```
+```{r eval=FALSE}
+glance(final_model)
+```
+
+
+
+|$R^2$| AIC | BIC| degrees of freedom |
+|---|---|---|---|
+|0.3396|2777.482|3016.621|47|
 
 
 ## Discussion
