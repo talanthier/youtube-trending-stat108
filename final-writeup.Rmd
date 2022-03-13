@@ -243,12 +243,17 @@ glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps +
     num_exc + desc_length + video_length + category*desc_length, data = youtube))
 ```
 
-This gave us the final model which includes the predictor variables `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, `video_length` and the iteractions between `category` and both `desc_length` and `subscriberCount`. Our final model is shown below.
+This gave us the final model which includes the predictor variables `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, `video_length` and the iteractions between `category` and both `desc_length` and `subscriberCount`.
+
+
+Our final model is shown below.
 \newpage
 
 ```{r echo = FALSE}
 final_model <- lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
     num_exc + desc_length + video_length + category*subscriberCount + category*desc_length, data = youtube)
+
+final_model_aug <- augment(final_model)
 
 tidy(final_model, conf.int = TRUE) %>%
   kable(digits = 4, format = 'markdown')
@@ -259,10 +264,11 @@ glance(final_model)
 
 
 
-|$R^2$| AIC | BIC| degrees of freedom |
+|$R^2$| AIC | BIC|
 |---|---|---|---|
-|0.3396|2777.482|3016.621|47|
+|0.3396|2777.482|3016.621|
 
+Seeing as our model is a multiple linear regression model, we have quite a few assumptions which needed to be checked.
 
 ## Discussion
 
