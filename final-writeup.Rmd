@@ -197,6 +197,9 @@ glance(lm(log_views ~ time_of_day + subscriberCount + category + num_caps +
 
 model <- lm(log_views ~ time_of_day+ subscriberCount + category + num_caps + 
     num_exc + desc_length + video_length, data = youtube)
+
+tidy(model, conf.int=TRUE) %>%
+  kable(digits = 3, format = 'markdown')
 ```
 
 
@@ -398,11 +401,13 @@ Looking at our model, very few of the coefficients are significantly different f
 
 While the coefficients for the interaction terms seem to be very close to 0 and aren't statistically significant, our model with those interactions removed has a much smaller $R^2$. Also, since subscriber counts and description lengths tend to be pretty large, while the coefficients are small the effect of these interaction terms are larger than the coefficients may indicate.
 
-From our analysis, we find most of the variables are not very helpful in explaining the differences in log view count across videos. Most notably, subscriber count is very important. Trending videos uploaded by channels with a larger subscriber counts tend to have larger view counts. Additionally the number of capital letters in the title is useful. It seems that a larger number of capital letters in the title is associated with smaller view counts. Interpreting the coefficient, holding all else constant, by increasing the number of capital letters in the title by 1 we would expect the view count of the video to be multiplied by a factor of $e^{-0.0085} = 0.992$. While this is statistically significant, it doesn't appear to be practically significant.
+From our analysis, we find most of the variables are not very helpful in explaining the differences in log view count across videos. Most notably, subscriber count is very important. Trending videos uploaded by channels with a larger subscriber counts tend to have larger view counts. But the content creator isn't directly in control of the subscriber count at the time of uploading. Additionally the number of capital letters in the title is useful. It seems that a larger number of capital letters in the title is associated with smaller view counts. Interpreting the coefficient, holding all else constant, by increasing the number of capital letters in the title by 1 we would expect the view count of the video to be multiplied by a factor of $e^{-0.0085} = 0.992$. So avoiding titles with all capital letters would be advised if we wanted to get as many views as possible. We also found that the number of exclamation points in the title is negatively associated with the log view count (and thus the total view count). So content creators may want to avoid putting many exclamation points in the title. So it seems that titling strategies like putting titles in all caps with many exclamation points is not associated with increased viewership. Rather it should be avoided. According to our model, uploading at times between 6 am and 11 pm is associated with a decrease in log views from uploading between 12 am and 5 am. The largest decrease in log view count is uploading between 6 am and 11 am and the smallest decrease is when uploading between 6 pm and 11 pm with a decrease in log view count of only -0.053 from our baseline upload time. So the optimal upload times seem to be during late nights and very early mornings.
 
 
  
 ## Limitations
+
+
 
 ## Conclusion
 
