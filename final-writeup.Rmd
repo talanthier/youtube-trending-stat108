@@ -1,5 +1,5 @@
 ---
-title: "Final Project"
+title: "Investigating potential predictors of view count for trending Youtube videos using linear regression"
 author: "Timothy Lanthier"
 date: "3/12/2022"
 output: pdf_document
@@ -43,9 +43,10 @@ youtube <- youtube_raw %>%
   
 In this paper, we will explore how certain characteristics of trending Youtube videos are associated with view count. We wish to find what aspects of a video such as length of the title or time of upload may be associated with the view count a Youtube video.
 
-The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtube-trending-video-dataset?select=US_youtube_trending_data.csv) and includes as observations all trending videos from August of 2020 to now from a variety of regions. For this analysis, we will only be using trending videos from the US. Note that the dataset we will be using was accessed from Kaggle on February 7, 2022, so we will only include trending Youtube videos up to that date. From this dataset, we have taken a random sample of 1000 videos and have generated some additional variables from the dataset. We also used the Youtube API with the provided video and channel IDs to gain additional potential predictors such as video length and subscriber counts for the channels. Our feature generation procedure left us with a few different missing values. There were some missing subscriber counts as well as video lengths due to videos and channels no longer existing. Since there were very few of those observations, we have removed them from our dataset. Additionaly, some videos had no description leading to missing values. So for those videos we imputed the description length of be 0 characters. 
+The dataset was obtained through [Kaggle](https://www.kaggle.com/rsrishav/youtube-trending-video-dataset?select=US_youtube_trending_data.csv) and includes as observations all trending videos from August of 2020 to now from a variety of regions. For this analysis, we will only be using trending videos from the US. Note that the dataset we will be using was accessed from Kaggle on February 7, 2022, so we will only include trending Youtube videos up to that date. From this dataset, we have taken a random sample of 1000 videos and have generated some additional variables from the dataset. We also used the Youtube API with the provided video and channel IDs to gain additional potential predictors such as video length and subscriber counts for the channels. Our feature generation procedure left us with a few different missing values. There were some missing subscriber counts as well as video lengths due to videos and channels no longer existing. Since there were very few of those observations, we have removed them from our dataset. Additionally, some videos had no description leading to missing values. So for those videos we imputed the description length of be 0 characters. 
 
 We also removed variables such as `likes`, `dislikes`, and `trending_age` since those values would not be observed until after the video is uploaded. Since we want to look at variables which can only be observed before the video is uploaded, those will not be important for our analysis. This leaves us with a dataset with 973 observations and the following 20 variables:
+
 
 |Variable|Description|
 |---|---|
@@ -393,8 +394,11 @@ As mentioned in the previous section, since the assumptions of our model (linear
 \[\log(y) = \beta_0 + \beta_1x_1 + \beta_2x_2 + \cdots\]
 where $y$ is the view count. Since we are predicting the log view count if we wanted to interpret the coefficients in terms of the actual view count, we would need to exponentiate our model. That is 
 \[y = \exp(\beta_0 + \beta_1x_1 + \beta_2x_2 + \cdots)\]
+Looking at our model, very few of the coefficients are significantly different from 0. In our final model, only the upload time of day, number of capital letters in the title, and number of exclamation points in the title seem to be statistically significant. We would also claim that subscriber count is statistically significant. Even though the confidence interval for `subscriberCount` include 0 and we have a large p-value, this only occurs due to our inclusion of interaction terms. Without the interaction terms, subscriber count is statistically significant. Additionally, if we were to remove subscriber count and its associated interaction terms from the model, our $R^2$ would drop from 0.3395 to 0.1134. So subscriber count is very important. While we cannot see it in our model above, the coefficient for subscriber count is a very small positive number. So holding all else constant, this means that an increase in subscriber count is associated with an increase in log view count (and subsequently an increase in view count).
 
+While the coefficients for the interaction terms seem to be very close to 0 and aren't statistically significant, our model with those interactions removed has a much smaller $R^2$. Also, since subscriber counts and description lengths tend to be pretty large, while the coefficients are small the effect of these interaction terms are larger than the coefficients may indicate.
 
+From our analysis, we find most of the variables are not very helpful in explaining the differences in log view count across videos. Most notably, subscriber count is very important. Trending videos uploaded by channels with a larger subscriber counts tend to have larger view counts. Additionally the number of capital letters in the title is useful. It seems that a larger number of capital letters in the title is associated with smaller view counts. Interpreting the coefficient, holding all else constant, by increasing the number of capital letters in the title by 1 we would expect the view count of the video to be multiplied by a factor of $e^{-0.0085} = 0.992$. While this is statistically significant, it doesn't appear to be practically significant.
 
 
  
