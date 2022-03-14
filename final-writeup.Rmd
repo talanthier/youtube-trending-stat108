@@ -407,9 +407,16 @@ From our analysis, we find most of the variables are not very helpful in explain
  
 ## Limitations
 
+There are quite a few limitations of our analysis. First off, our model is built based off of a random sample of trending videos between August of 2020 and February of 2022. Seeing that this is the case, it may be inappropriate to use conclusions based off the model in the future. If Youtube's algorithm for selecting trending videos were to change our conclusions would no longer be relevant.
+
+Furthermore the assumptions of the model were not all satisfied. Specifically, the constant variance assumption was violated and the normality assumption was only partially satisfied. Since this is the case we would need to take the conclusions we made with a grain of salt.
 
 
 ## Conclusion
+
+As we have seen, we have seen, the following variables are useful predictors:
+
+But due to not all assumptions being satisfied, all conclusions should not be taken at face value. Instead this model is merely suggesting the relationships between view count and these variables.
 
 ## Additional Work
 
