@@ -304,7 +304,7 @@ l3 <- ggplot(data = final_model_aug, aes(x = obs_num, y = .cooksd))+
 l1 + l2 + l3
 ```
 
-Seeing as our model is a multiple linear regression model, we have quite a few assumptions which needed to be checked if we wish to conduct inference on the coefficients. The first assumption is that `log_views` is normally distributed. As we noted before, the distribution for `log_views` seems to be approximately normal. We also have the following distribution and QQ plot of the residuals.
+Seeing as our model is a multiple linear regression model, we have quite a few assumptions which needed to be checked if we wish to conduct inference on the coefficients. The first assumption is that our response variable is normally distributed. We intended to use `view_count` as our response variable, but seeing as `view_count` was heavily skewed, we decided to use `log_views` as our response variable. As we noted before, the distribution for `log_views` seems to be approximately normal. We also have the following distribution and QQ plot of the residuals.
 
 ```{r echo = FALSE}
 n1 <- ggplot(data = final_model_aug, aes(x =.resid)) +
@@ -389,7 +389,14 @@ Since the constant variance assumption has been violated and the normality assum
 
 ## Discussion
 
-As mentioned in the previous section, since the assumptions of our model (linearity, constant variance, independence, and normality) have not all been satisfied, we should be cautious when interpreting the coefficients of our model.
+As mentioned in the previous section, since the assumptions of our model (linearity, constant variance, independence, and normality) have not all been satisfied, we should be cautious when interpreting the coefficients of our model. Since we have so many interaction terms, interpreting the coefficients becomes quite difficult. Our model was of the form
+\[\log(y) = \beta_0 + \beta_1x_1 + \beta_2x_2 + \cdots\]
+where $y$ is the view count. Since we are predicting the log view count if we wanted to interpret the coefficients in terms of the actual view count, we would need to exponentiate our model. That is 
+\[y = \exp(\beta_0 + \beta_1x_1 + \beta_2x_2 + \cdots)\]
+
+
+
+
  
 ## Limitations
 
