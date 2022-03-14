@@ -16,6 +16,7 @@ library(leaps)
 library(Hmisc)
 library(corrplot)
 library(RColorBrewer)
+library(rms)
 ```
 
 ## Introduction
@@ -197,7 +198,8 @@ model <- lm(log_views ~ time_of_day+ subscriberCount + category + num_caps +
     num_exc + desc_length + video_length, data = youtube)
 ```
 
-Next we ran backwards selection on this model using AIC. This gave us a model with `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, and `video_length` as the best model. Just to make sure we didn't miss any important variables, we added back in some of the variables to check whether there would be an improvement, but none of the variables led to any significant increase in $R^2$. Next, we checked some potential interactions between our predictor variables. We found that interactions between `time_of_day` and `category`, `category` and `subscriberCount`, and `category` and `desc_length` to yield significant increases in $R^2$ for our model. We then checked all possible models with these different interaction terms and chose the model with the lowest AIC.
+
+Next we ran backwards selection on this model using AIC. This gave us a model with `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, and `video_length` as the best model. Just to make sure we didn't miss any important variables, we added back in some of the variables to check whether there would be an improvement, but none of the variables led to any significant increase in $R^2$. We noted that there may be some interactions between `category` and other variables, so we checked some potential interactions between `category` and found that interactions between `time_of_day` and `category`, `category` and `subscriberCount`, and `category` and `desc_length` to yield significant increases in $R^2$ for our model. We then checked all possible models with these different interaction terms and chose the model with the lowest AIC.
 
 ```{r echo = FALSE, results = 'hide'}
 glance(model)
@@ -217,7 +219,7 @@ glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps +
     num_exc + desc_length + video_length + category*video_length, data = youtube))
 
 glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
-    num_exc + desc_length + video_length + subscriberCount*desc_length, data = youtube))
+    num_exc + desc_length + video_length + category*num_exc, data = youtube))
 
 ```
 
@@ -244,10 +246,9 @@ glance(lm(log_views ~ time_of_day + subscriberCount +category + num_caps +
     num_exc + desc_length + video_length + category*desc_length, data = youtube))
 ```
 
-This gave us the final model which includes the predictor variables `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, `video_length` and the iteractions between `category` and both `desc_length` and `subscriberCount`.
+This gave us the final model which includes the predictor variables `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, `video_length` and the interactions between `category` and both `desc_length` and `subscriberCount`. The coefficients for our final model are shown on the following page.
 
 
-Our final model is shown below.
 \newpage
 
 ```{r echo = FALSE}
@@ -262,6 +263,10 @@ tidy(final_model, conf.int = TRUE) %>%
 
 final_model_no_sub <- lm(log_views ~ time_of_day +category + num_caps + 
     num_exc + desc_length + video_length + category*desc_length, data = youtube)
+
+final_model_no_cat <- lm(log_views ~ time_of_day + subscriberCount +category + num_caps + 
+    num_exc + desc_length + video_length + category*subscriberCount + category*desc_length, data = youtube)
+
 ```
 
 ```{r eval=FALSE}
