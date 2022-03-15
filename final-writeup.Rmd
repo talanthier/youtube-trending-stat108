@@ -114,7 +114,7 @@ youtube_num <- youtube %>%
 M <-cor(youtube_num)
 corrplot(M, type="upper", method="color")
 ```
-Looking at the correlation plots, we can see that `subscriberCount` has a moderate correlation with log views. We also find that `num_caps` and `num_exc` have a weak correlation with log views. Additionally we see that the hour published has a very weak correlation. But from our exploratory data analysis, we found that there was quite a bit of variability of log view count for the different hours published so we will investigate its use further.
+Looking at the correlation plot shown above, we can see that `subscriberCount` has a moderate correlation with log view count. We also find that `num_caps` and `num_exc` have a weak correlation with log views. Additionally we see that the hour published has a very weak correlation. But from our exploratory data analysis, we found that there was quite a bit of variability of log view count for the different hours published so we will investigate its use further. Note that `hour_published` is extremely 
 
 
 ## Regression Analysis
@@ -407,16 +407,16 @@ From our analysis, we find most of the variables are not very helpful in explain
  
 ## Limitations
 
-There are quite a few limitations of our analysis. First off, our model is built based off of a random sample of trending videos between August of 2020 and February of 2022. Seeing that this is the case, it may be inappropriate to use conclusions based off the model in the future. If Youtube's algorithm for selecting trending videos were to change our conclusions would no longer be relevant.
-
-Furthermore the assumptions of the model were not all satisfied. Specifically, the constant variance assumption was violated and the normality assumption was only partially satisfied. Since this is the case we would need to take the conclusions we made with a grain of salt.
+There are quite a few limitations of our analysis. First off, our model is built based off of a random sample of trending videos between August of 2020 and February of 2022. Seeing that this is the case, it may be inappropriate to use conclusions based off the model in the future. If Youtube's algorithm for selecting trending videos were to change our conclusions would no longer be relevant. Furthermore the assumptions of the model were not all satisfied. Specifically, the constant variance assumption was violated and the normality assumption was only partially satisfied. Since this is the case, the findings that were discussed in the previous section should be taken with a grain of salt.
 
 
 ## Conclusion
 
-As we have seen, we have seen, the following variables are useful predictors:
+As we have seen, we have built a model using the predictor variables `time_of_day`, `subscriberCount`, `category`, `num_caps`, `num_exc`, `desc_length`, `video_length`, and the interactions of `subscriberCount` and `desc_length` with `category` for predicting log view count. From this model we found the time of day of upload, subscriber count, number of exclamation points in the title, and number of capital letters in the title were significant predictors of log view count. We found there was a positive association between log view count and subscriber count. Also, there was a negative association between log view count and the number of capital letters and exclamation points in the title. Finally, we found that the optimal times to maximize log view count would be during late night and early morning hours in the PST time zone. But due to not all assumptions being satisfied, all conclusions should not be taken at face value. So we cannot conclude that these are the true associations between the variables we have mentioned.
 
-But due to not all assumptions being satisfied, all conclusions should not be taken at face value. Instead this model is merely suggesting the relationships between view count and these variables.
+If I were to run this analysis again, the main thing I would have changed is the dataset used. Our dataset in our analysis only includes trending videos. I'd be interested to see what our conclusions would be if we were to run this analysis on a random sample of all Youtube videos. I would suspect predictors which were less important in our model such as `category` and `num_tags` would be more important in these cases.
 
 ## Additional Work
+
+
 
